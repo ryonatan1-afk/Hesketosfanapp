@@ -1,0 +1,173 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { quizzes } from "@/data/quizzes";
+
+const OPTION_COLORS = [
+  "bg-blue",
+  "bg-coral",
+  "bg-lavender",
+  "bg-yellow",
+] as const;
+
+// Use the first quiz by default — can be made a prop later
+const quiz = quizzes[0];
+
+export default function QuizPlayer() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+  const [finished, setFinished] = useState(false);
+
+  const question = quiz.questions[currentIndex];
+  const total = quiz.questions.length;
+  const isAnswered = selected !== null;
+
+  function handleSelect(index: number) {
+    if (isAnswered) return;
+    setSelected(index);
+    if (index === question.correctIndex) setScore((s) => s + 1);
+  }
+
+  function handleNext() {
+    if (currentIndex + 1 >= total) {
+      setFinished(true);
+    } else {
+      setCurrentIndex((i) => i + 1);
+      setSelected(null);
+    }
+  }
+
+  function handleRestart() {
+    setCurrentIndex(0);
+    setSelected(null);
+    setScore(0);
+    setFinished(false);
+  }
+
+  if (finished) {
+    return (
+      <div className="min-h-[80vh] bg-yellow flex flex-col items-center justify-center gap-6 p-6 text-center relative overflow-hidden">
+        <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
+        <motion.div
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 14 }}
+          className="flex flex-col items-center gap-5"
+        >
+          <span className="text-8xl">⭐</span>
+          <h1 className="text-white text-6xl font-black leading-tight drop-shadow">
+            כל הכבוד!
+          </h1>
+          <p className="text-white text-2xl font-bold">
+            ענית נכון על {score} מתוך {total} שאלות
+          </p>
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={handleRestart}
+            className="mt-4 bg-white text-yellow text-2xl font-black px-10 py-5 rounded-3xl shadow-lg"
+          >
+            שחק שוב
+          </motion.button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-[80vh] bg-yellow flex flex-col p-6 relative overflow-hidden">
+      <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
+
+      {/* Progress bar */}
+      <div className="w-full h-3 bg-white/30 rounded-full mb-6 overflow-hidden">
+        <motion.div
+          className="h-full bg-white rounded-full"
+          animate={{ width: `${((currentIndex + 1) / total) * 100}%` }}
+          transition={{ duration: 0.4 }}
+        />
+      </div>
+
+      {/* Episode + counter */}
+      <div className="flex justify-between items-center mb-4">
+        <span className="text-white/80 text-sm font-bold">{quiz.episodeLabel}</span>
+        <span className="text-white/80 text-sm font-bold">
+          {currentIndex + 1} / {total}
+        </span>
+      </div>
+
+      {/* Question card */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentIndex}
+          initial={{ x: 60, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: -60, opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          className="flex flex-col flex-1 gap-5"
+        >
+          <h2 className="text-white text-3xl font-black leading-snug text-center mb-2">
+            {question.question}
+          </h2>
+
+          {/* Answer buttons */}
+          <div className="flex flex-col gap-4">
+            {question.options.map((option, i) => {
+              let bgClass: string = OPTION_COLORS[i];
+              let animateProps = {};
+
+              if (isAnswered) {
+                if (i === question.correctIndex) {
+                  bgClass = "bg-green-400";
+                  animateProps = { scale: [1, 1.08, 1] };
+                } else if (i === selected) {
+                  bgClass = "bg-red-400";
+                  animateProps = { x: [0, -10, 10, -10, 10, 0] };
+                }
+              }
+
+              const isDimmed =
+                isAnswered &&
+                i !== question.correctIndex &&
+                i !== selected;
+
+              return (
+                <motion.button
+                  key={i}
+                  animate={animateProps}
+                  transition={{ duration: 0.4 }}
+                  onClick={() => handleSelect(i)}
+                  className={`
+                    ${bgClass}
+                    ${isDimmed ? "opacity-40" : "opacity-100"}
+                    w-full py-5 px-6 rounded-3xl
+                    text-white text-xl font-black text-right
+                    shadow-md active:scale-95 transition-opacity
+                  `}
+                >
+                  {option}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Next button */}
+          <AnimatePresence>
+            {isAnswered && (
+              <motion.button
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 20, opacity: 0 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={handleNext}
+                className="mt-2 bg-ink text-white text-xl font-black py-5 rounded-3xl shadow-lg"
+              >
+                {currentIndex + 1 >= total ? "סיום ✓" : "הבא ←"}
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}

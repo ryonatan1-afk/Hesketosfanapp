@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* ── Brand color palette (extracted from Hesketos style guide) ── */
+:root {
+  --blue:    #68B8ED;   /* sky blue  — primary podcast screen bg  */
+  --yellow:  #F5A820;   /* warm gold — alternate episode bg        */
+  --lavender:#9090CC;   /* periwinkle — third episode bg variant   */
+  --coral:   #F08060;   /* salmon    — bottom strip / accent       */
+  --ink:     #1C1C1E;   /* near-black — text, play button          */
+  --white:   #FFFFFF;
+}
+
+/* ── Tailwind v4 theme tokens ── */
+@theme inline {
+  --font-sans: var(--font-heebo), Arial, sans-serif;
+
+  --color-blue:    var(--blue);
+  --color-yellow:  var(--yellow);
+  --color-lavender:var(--lavender);
+  --color-coral:   var(--coral);
+  --color-ink:     var(--ink);
+  --color-white:   var(--white);
+  --color-background: var(--white);
+  --color-foreground: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
