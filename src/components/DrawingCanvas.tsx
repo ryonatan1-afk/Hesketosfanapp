@@ -149,6 +149,7 @@ export default function DrawingCanvas() {
   const [brushSize, setBrushSize] = useState(10);
   const [canUndo,       setCanUndo]       = useState(false);
   const [tool,          setTool]          = useState<Tool>("brush");
+  const [showSizePicker, setShowSizePicker] = useState(false);
   const [galleryStatus, setGalleryStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [canNativeShare, setCanNativeShare] = useState(false);
 
@@ -226,6 +227,7 @@ export default function DrawingCanvas() {
   // ── Pointer handlers ────────────────────────────────────────────────────────
 
   function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+    setShowSizePicker(false);
     ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (ptrs.current.size === 2) {
@@ -485,20 +487,48 @@ export default function DrawingCanvas() {
       {/* Tool toggle + brush sizes + actions */}
       <div className="flex items-center justify-between px-4 py-2 shrink-0 gap-3">
         <div className="flex items-center gap-3">
-          {/* Brush */}
-          <button
-            onClick={() => setTool("brush")}
-            aria-label="מִבְרֶשֶׁת"
-            className={`flex items-center justify-center w-10 h-10 rounded-2xl shadow transition-all ${
-              tool === "brush" ? "bg-ink text-white scale-110" : "bg-white/80 text-ink opacity-60"
-            }`}
-          >
-            <Paintbrush size={20} />
-          </button>
+          {/* Brush — tap to activate; tap again to toggle size picker */}
+          <div className="relative">
+            <button
+              onClick={() => {
+                if (tool === "brush") {
+                  setShowSizePicker((s) => !s);
+                } else {
+                  setTool("brush");
+                  setShowSizePicker(false);
+                }
+              }}
+              aria-label="מִבְרֶשֶׁת"
+              className={`flex items-center justify-center w-10 h-10 rounded-2xl shadow transition-all ${
+                tool === "brush" ? "bg-ink text-white scale-110" : "bg-white/80 text-ink opacity-60"
+              }`}
+            >
+              <Paintbrush size={20} />
+            </button>
+
+            {/* Vertical size popover */}
+            {tool === "brush" && showSizePicker && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 flex flex-col items-center gap-3 bg-white rounded-2xl px-4 py-3 shadow-xl z-20">
+                {[...BRUSH_SIZES].reverse().map((size) => {
+                  const dim = size === 4 ? 14 : size === 10 ? 22 : 32;
+                  return (
+                    <button
+                      key={size}
+                      onClick={() => { setBrushSize(size); setShowSizePicker(false); }}
+                      className={`rounded-full bg-ink transition-all ${
+                        brushSize === size ? "ring-2 ring-offset-2 ring-blue-400 scale-110" : "opacity-30"
+                      }`}
+                      style={{ width: dim, height: dim }}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Bucket */}
           <button
-            onClick={() => setTool("bucket")}
+            onClick={() => { setTool("bucket"); setShowSizePicker(false); }}
             aria-label="דְּלִי צֶבַע"
             className={`flex items-center justify-center w-10 h-10 rounded-2xl shadow transition-all ${
               tool === "bucket" ? "bg-ink text-white scale-110" : "bg-white/80 text-ink opacity-60"
@@ -506,27 +536,6 @@ export default function DrawingCanvas() {
           >
             <PaintBucket size={20} />
           </button>
-
-          {/* Brush sizes — only when brush tool active */}
-          {tool === "brush" && (
-            <div className="flex items-center gap-3">
-              {BRUSH_SIZES.map((size) => {
-                const dim = size === 4 ? 16 : size === 10 ? 24 : 34;
-                return (
-                  <button
-                    key={size}
-                    onClick={() => setBrushSize(size)}
-                    className={`rounded-full bg-white transition-all shadow ${
-                      brushSize === size
-                        ? "ring-2 ring-white ring-offset-2 ring-offset-lavender scale-110"
-                        : "opacity-60"
-                    }`}
-                    style={{ width: dim, height: dim }}
-                  />
-                );
-              })}
-            </div>
-          )}
         </div>
 
         {/* Actions */}
