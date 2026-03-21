@@ -39,7 +39,7 @@ export default function QuizPlayer() {
   // Episode selector screen
   if (!quiz) {
     return (
-      <div className="min-h-[80vh] bg-blue flex flex-col p-6 pb-24 relative overflow-hidden">
+      <div className="min-h-screen bg-blue flex flex-col p-6 pb-24 relative overflow-hidden">
         <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
         <h1 className="text-white text-4xl font-black text-center mb-8 mt-4 drop-shadow">
           בְּחַר פֶּרֶק
@@ -57,6 +57,9 @@ export default function QuizPlayer() {
             </motion.button>
           ))}
         </div>
+        <p className="text-white/60 text-sm font-bold text-center mt-6">
+          עוֹד פְּרָקִים בַּדֶּרֶךְ ✨
+        </p>
       </div>
     );
   }
@@ -89,7 +92,7 @@ export default function QuizPlayer() {
 
   if (finished) {
     return (
-      <div className="min-h-[80vh] bg-yellow flex flex-col items-center justify-center gap-6 p-6 text-center relative overflow-hidden">
+      <div className="min-h-screen bg-yellow flex flex-col items-center justify-center gap-6 p-6 text-center relative overflow-hidden">
         <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
@@ -126,7 +129,7 @@ export default function QuizPlayer() {
   }
 
   return (
-    <div className="min-h-[80vh] bg-yellow flex flex-col p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-yellow flex flex-col p-6 relative overflow-hidden">
       <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
 
       {/* Progress bar */}

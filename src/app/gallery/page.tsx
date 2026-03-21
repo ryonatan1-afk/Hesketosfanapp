@@ -46,7 +46,7 @@ export default function GalleryPage() {
   }, [fetchArtworks]);
 
   return (
-    <div className="min-h-[80vh] bg-coral flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-coral flex flex-col relative overflow-hidden">
       <div className="absolute bottom-0 inset-x-0 h-3 bg-yellow rounded-t-full" />
 
       <div className="flex flex-col items-center pt-8 pb-4 px-6 text-center">

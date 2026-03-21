@@ -71,7 +71,7 @@ export default function AdminPage() {
 
   if (!authed) {
     return (
-      <div className="min-h-[80vh] bg-ink flex flex-col items-center justify-center p-6 gap-6">
+      <div className="min-h-screen bg-ink flex flex-col items-center justify-center p-6 gap-6">
         <Lock size={48} className="text-white/40" />
         <h1 className="text-white text-3xl font-black">נִיהוּל גַּלֶרְיָה</h1>
         <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full max-w-xs">
@@ -98,7 +98,7 @@ export default function AdminPage() {
   const approved = artworks.filter((a) => a.approved);
 
   return (
-    <div className="min-h-[80vh] bg-ink flex flex-col p-4 pb-24">
+    <div className="min-h-screen bg-ink flex flex-col p-4 pb-24">
       <h1 className="text-white text-3xl font-black text-center py-6">נִיהוּל גַּלֶרְיָה</h1>
 
       {loading ? (

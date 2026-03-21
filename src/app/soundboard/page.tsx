@@ -50,7 +50,7 @@ function playSound(file: string) {
   }
 
   return (
-    <div className="min-h-[80vh] bg-lavender flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-lavender flex flex-col relative overflow-hidden">
       <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
 
       {/* Emoji overlay */}
