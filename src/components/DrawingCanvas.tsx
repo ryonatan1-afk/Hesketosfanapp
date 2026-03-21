@@ -127,6 +127,9 @@ export default function DrawingCanvas() {
   const ptrs          = useRef<Map<number, { x: number; y: number }>>(new Map());
   const pinchDist0    = useRef<number | null>(null);
   const pinchMid0     = useRef<{ x: number; y: number } | null>(null);
+  // Deferred action: position recorded on pointerDown, committed only once we
+  // know it's a single-finger gesture (on first move for brush, on pointerUp for bucket)
+  const pendingPos    = useRef<{ x: number; y: number } | null>(null);
 
   // zoom/pan stored in both refs (for sync reads in gesture handlers)
   // and state (for rendering)
@@ -209,36 +212,21 @@ export default function DrawingCanvas() {
     ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     if (ptrs.current.size === 2) {
-      // Starting a pinch — record baseline distance + midpoint
+      // Second finger arrived — cancel any pending single-finger action
+      pendingPos.current = null;
+      isDrawing.current  = false;
       const [a, b] = Array.from(ptrs.current.values());
       pinchDist0.current = dist2(a, b);
       pinchMid0.current  = mid2(a, b);
-      isDrawing.current  = false;   // cancel any in-progress stroke
       return;
     }
     if (ptrs.current.size > 1) return;
 
-    // Single pointer: draw or fill
+    // Single pointer: capture and record position — don't draw yet
     const canvas = canvasRef.current;
-    const ctx    = getCtx();
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
     canvas.setPointerCapture(e.pointerId);
-    const pos = getCanvasPos(canvas, e);
-
-    if (tool === "bucket") {
-      saveToUndo();
-      floodFill(canvas, ctx, pos.x, pos.y, color);
-      return;
-    }
-
-    saveToUndo();
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-    ctx.strokeStyle = color;
-    ctx.lineWidth   = brushSize;
-    ctx.lineJoin    = "round";
-    ctx.lineCap     = "round";
-    isDrawing.current = true;
+    pendingPos.current = getCanvasPos(canvas, e);
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -251,13 +239,11 @@ export default function DrawingCanvas() {
       const z0  = zoomRef.current;
       const p0  = panRef.current;
 
-      // Pinch → zoom
       let nextZoom = z0;
       if (pinchDist0.current && pinchDist0.current > 0) {
         nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z0 * (d / pinchDist0.current)));
       }
 
-      // Two-finger drag → pan
       let nextPan = p0;
       if (pinchMid0.current) {
         const dx = m.x - pinchMid0.current.x;
@@ -271,22 +257,49 @@ export default function DrawingCanvas() {
       return;
     }
 
-    if (!isDrawing.current || tool !== "brush") return;
+    if (tool !== "brush") return;
+
     const canvas = canvasRef.current;
     const ctx    = getCtx();
     if (!canvas || !ctx) return;
     const pos = getCanvasPos(canvas, e);
+
+    // First move with a pending start → commit the stroke now
+    if (pendingPos.current && !isDrawing.current) {
+      saveToUndo();
+      ctx.beginPath();
+      ctx.moveTo(pendingPos.current.x, pendingPos.current.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth   = brushSize;
+      ctx.lineJoin    = "round";
+      ctx.lineCap     = "round";
+      pendingPos.current = null;
+      isDrawing.current  = true;
+    }
+
+    if (!isDrawing.current) return;
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
   }
 
   function handlePointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = canvasRef.current;
+    const ctx    = getCtx();
+
     ptrs.current.delete(e.pointerId);
+
+    // Bucket fill fires on pointer-up of a single-finger tap (pendingPos still set = no move happened)
+    if (tool === "bucket" && pendingPos.current && ptrs.current.size === 0 && canvas && ctx) {
+      saveToUndo();
+      floodFill(canvas, ctx, pendingPos.current.x, pendingPos.current.y, color);
+    }
+
+    pendingPos.current = null;
+    isDrawing.current  = false;
     if (ptrs.current.size < 2) {
       pinchDist0.current = null;
       pinchMid0.current  = null;
     }
-    isDrawing.current = false;
   }
 
   // ── Button handlers ─────────────────────────────────────────────────────────
@@ -366,8 +379,8 @@ export default function DrawingCanvas() {
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
-            onPointerCancel={handlePointerUp}
+            onPointerLeave={(e) => { pendingPos.current = null; handlePointerUp(e); }}
+            onPointerCancel={(e) => { pendingPos.current = null; handlePointerUp(e); }}
           />
         </div>
 
