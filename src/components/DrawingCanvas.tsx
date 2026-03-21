@@ -387,10 +387,10 @@ export default function DrawingCanvas() {
   const cursor = tool === "bucket" ? "cell" : "crosshair";
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-5rem)] bg-lavender select-none">
+    <div className="flex flex-col h-[calc(100dvh-6rem)] bg-lavender select-none">
 
       {/* Template picker */}
-      <div className="flex gap-3 px-3 py-2 overflow-x-auto shrink-0 bg-lavender">
+      <div className="flex gap-3 px-3 py-2 overflow-x-auto shrink-0 bg-lavender" dir="ltr">
         {TEMPLATES.map((n) => (
           <button
             key={n}
