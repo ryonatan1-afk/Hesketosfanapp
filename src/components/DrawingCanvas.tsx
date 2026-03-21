@@ -177,7 +177,7 @@ export default function DrawingCanvas() {
     const ctx = getCtx();
     if (!canvas || !ctx) return;
     const img = new Image();
-    img.src = `/coloringpages/${n}.jpg`;
+    img.src = `/coloringpages/${n}.svg`;
     img.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -356,7 +356,7 @@ export default function DrawingCanvas() {
             }`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/coloringpages/${n}.jpg`} alt={`תבנית ${n}`} className="w-full h-full object-cover" />
+            <img src={`/coloringpages/${n}.svg`} alt={`תבנית ${n}`} className="w-full h-full object-cover" />
           </button>
         ))}
       </div>

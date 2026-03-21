@@ -25,6 +25,8 @@
         "@types/react-dom": "^19",
         "eslint": "^9",
         "eslint-config-next": "16.2.0",
+        "imagetracerjs": "^1.2.6",
+        "jpeg-js": "^0.4.4",
         "tailwindcss": "^4",
         "typescript": "^5"
     }
