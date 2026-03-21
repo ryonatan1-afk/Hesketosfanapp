@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Undo2, Trash2, Download } from "lucide-react";
+import { Undo2, Trash2, Download, Paintbrush, PaintBucket, ZoomIn, ZoomOut } from "lucide-react";
+
+type Tool = "brush" | "bucket";
 
 const TEMPLATES = [1, 2, 3, 4, 5, 6];
 
@@ -19,7 +21,11 @@ const COLORS = [
 ];
 
 const BRUSH_SIZES = [4, 10, 20];
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 5;
 
+// getBoundingClientRect accounts for CSS transforms, so this correctly maps
+// screen pointer coordinates → canvas pixel coordinates even when zoomed/panned.
 function getCanvasPos(canvas: HTMLCanvasElement, e: React.PointerEvent) {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
@@ -30,28 +36,143 @@ function getCanvasPos(canvas: HTMLCanvasElement, e: React.PointerEvent) {
   };
 }
 
+function hexToRgb(hex: string) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) }
+    : { r: 0, g: 0, b: 0 };
+}
+
+function floodFill(
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D,
+  startX: number,
+  startY: number,
+  fillHex: string,
+  tolerance = 32
+) {
+  const px = Math.round(startX);
+  const py = Math.round(startY);
+  const width = canvas.width;
+  const height = canvas.height;
+  if (px < 0 || px >= width || py < 0 || py >= height) return;
+
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  const startIdx = (py * width + px) * 4;
+  const startR = data[startIdx];
+  const startG = data[startIdx + 1];
+  const startB = data[startIdx + 2];
+  const fill = hexToRgb(fillHex);
+
+  // Skip if already the target color
+  if (
+    Math.abs(startR - fill.r) <= 5 &&
+    Math.abs(startG - fill.g) <= 5 &&
+    Math.abs(startB - fill.b) <= 5
+  ) return;
+
+  const visited = new Uint8Array(width * height);
+  const stack: number[] = [py * width + px];
+  visited[py * width + px] = 1;
+
+  while (stack.length > 0) {
+    const pixel = stack.pop()!;
+    const x = pixel % width;
+    const y = (pixel / width) | 0;
+    const idx = pixel * 4;
+    data[idx]     = fill.r;
+    data[idx + 1] = fill.g;
+    data[idx + 2] = fill.b;
+    data[idx + 3] = 255;
+
+    const neighbors = [
+      x > 0          ? pixel - 1     : -1,
+      x < width - 1  ? pixel + 1     : -1,
+      y > 0          ? pixel - width : -1,
+      y < height - 1 ? pixel + width : -1,
+    ];
+    for (const nb of neighbors) {
+      if (nb < 0 || visited[nb]) continue;
+      const nIdx = nb * 4;
+      const dr = data[nIdx]     - startR;
+      const dg = data[nIdx + 1] - startG;
+      const db = data[nIdx + 2] - startB;
+      if (Math.sqrt(dr * dr + dg * dg + db * db) <= tolerance) {
+        visited[nb] = 1;
+        stack.push(nb);
+      }
+    }
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function dist2(a: { x: number; y: number }, b: { x: number; y: number }) {
+  const dx = a.x - b.x, dy = a.y - b.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function mid2(a: { x: number; y: number }, b: { x: number; y: number }) {
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
 export default function DrawingCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isDrawing = useRef(false);
-  const undoStack = useRef<ImageData[]>([]);
+  const canvasRef     = useRef<HTMLCanvasElement>(null);
+  const wrapRef       = useRef<HTMLDivElement>(null);   // the overflow-hidden container
+  const isDrawing     = useRef(false);
+  const undoStack     = useRef<ImageData[]>([]);
+  const isFirstMount  = useRef(true);
+
+  // Pinch gesture tracking
+  const ptrs          = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchDist0    = useRef<number | null>(null);
+  const pinchMid0     = useRef<{ x: number; y: number } | null>(null);
+
+  // zoom/pan stored in both refs (for sync reads in gesture handlers)
+  // and state (for rendering)
+  const zoomRef       = useRef(1);
+  const panRef        = useRef({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [pan,  setPan]  = useState({ x: 0, y: 0 });
 
   const [selectedTemplate, setSelectedTemplate] = useState(1);
-  const [color, setColor] = useState("#1C1C1E");
+  const [color,     setColor]     = useState("#1C1C1E");
   const [brushSize, setBrushSize] = useState(10);
-  const [canUndo, setCanUndo] = useState(false);
+  const [canUndo,   setCanUndo]   = useState(false);
+  const [tool,      setTool]      = useState<Tool>("brush");
+
+  // Keep state and refs in sync
+  function applyView(newZoom: number, newPan: { x: number; y: number }) {
+    zoomRef.current = newZoom;
+    panRef.current  = newPan;
+    setZoom(newZoom);
+    setPan(newPan);
+  }
+
+  // Clamp pan so the image can't drift fully off-screen
+  function clampPan(x: number, y: number, z: number): { x: number; y: number } {
+    if (z <= 1) return { x: 0, y: 0 };
+    const wrap = wrapRef.current;
+    if (!wrap) return { x, y };
+    const maxX = (wrap.offsetWidth  * (z - 1)) / 2;
+    const maxY = (wrap.offsetHeight * (z - 1)) / 2;
+    return {
+      x: Math.max(-maxX, Math.min(maxX, x)),
+      y: Math.max(-maxY, Math.min(maxY, y)),
+    };
+  }
 
   const getCtx = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return null;
-    return canvas.getContext("2d");
+    return canvas ? canvas.getContext("2d") : null;
   }, []);
 
-  const loadTemplate = useCallback((templateNum: number) => {
+  const loadTemplate = useCallback((n: number) => {
     const canvas = canvasRef.current;
     const ctx = getCtx();
     if (!canvas || !ctx) return;
     const img = new Image();
-    img.src = `/coloringpages/${templateNum}.jpg`;
+    img.src = `/coloringpages/${n}.jpg`;
     img.onload = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -60,18 +181,15 @@ export default function DrawingCanvas() {
     };
   }, [getCtx]);
 
-  // Initialize canvas size and load first template
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    canvas.width = canvas.offsetWidth;
+    canvas.width  = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     loadTemplate(selectedTemplate);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load new template when selection changes (skip on first mount)
-  const isFirstMount = useRef(true);
   useEffect(() => {
     if (isFirstMount.current) { isFirstMount.current = false; return; }
     loadTemplate(selectedTemplate);
@@ -85,41 +203,98 @@ export default function DrawingCanvas() {
     setCanUndo(true);
   }
 
+  // ── Pointer handlers ────────────────────────────────────────────────────────
+
   function handlePointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
+    ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (ptrs.current.size === 2) {
+      // Starting a pinch — record baseline distance + midpoint
+      const [a, b] = Array.from(ptrs.current.values());
+      pinchDist0.current = dist2(a, b);
+      pinchMid0.current  = mid2(a, b);
+      isDrawing.current  = false;   // cancel any in-progress stroke
+      return;
+    }
+    if (ptrs.current.size > 1) return;
+
+    // Single pointer: draw or fill
     const canvas = canvasRef.current;
-    const ctx = getCtx();
+    const ctx    = getCtx();
     if (!canvas || !ctx) return;
     canvas.setPointerCapture(e.pointerId);
-    saveToUndo();
     const pos = getCanvasPos(canvas, e);
+
+    if (tool === "bucket") {
+      saveToUndo();
+      floodFill(canvas, ctx, pos.x, pos.y, color);
+      return;
+    }
+
+    saveToUndo();
     ctx.beginPath();
     ctx.moveTo(pos.x, pos.y);
     ctx.strokeStyle = color;
-    ctx.lineWidth = brushSize;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
+    ctx.lineWidth   = brushSize;
+    ctx.lineJoin    = "round";
+    ctx.lineCap     = "round";
     isDrawing.current = true;
   }
 
   function handlePointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
-    if (!isDrawing.current) return;
+    ptrs.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (ptrs.current.size >= 2) {
+      const [a, b] = Array.from(ptrs.current.values());
+      const d   = dist2(a, b);
+      const m   = mid2(a, b);
+      const z0  = zoomRef.current;
+      const p0  = panRef.current;
+
+      // Pinch → zoom
+      let nextZoom = z0;
+      if (pinchDist0.current && pinchDist0.current > 0) {
+        nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z0 * (d / pinchDist0.current)));
+      }
+
+      // Two-finger drag → pan
+      let nextPan = p0;
+      if (pinchMid0.current) {
+        const dx = m.x - pinchMid0.current.x;
+        const dy = m.y - pinchMid0.current.y;
+        nextPan = clampPan(p0.x + dx, p0.y + dy, nextZoom);
+      }
+
+      applyView(nextZoom, nextPan);
+      pinchDist0.current = d;
+      pinchMid0.current  = m;
+      return;
+    }
+
+    if (!isDrawing.current || tool !== "brush") return;
     const canvas = canvasRef.current;
-    const ctx = getCtx();
+    const ctx    = getCtx();
     if (!canvas || !ctx) return;
     const pos = getCanvasPos(canvas, e);
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
   }
 
-  function handlePointerUp() {
+  function handlePointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
+    ptrs.current.delete(e.pointerId);
+    if (ptrs.current.size < 2) {
+      pinchDist0.current = null;
+      pinchMid0.current  = null;
+    }
     isDrawing.current = false;
   }
+
+  // ── Button handlers ─────────────────────────────────────────────────────────
 
   function handleUndo() {
     const ctx = getCtx();
     if (!ctx || undoStack.current.length === 0) return;
-    const imageData = undoStack.current.pop()!;
-    ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(undoStack.current.pop()!, 0, 0);
     setCanUndo(undoStack.current.length > 0);
   }
 
@@ -135,6 +310,18 @@ export default function DrawingCanvas() {
     link.href = canvas.toDataURL("image/png");
     link.click();
   }
+
+  function handleZoomIn() {
+    const next = Math.min(MAX_ZOOM, zoomRef.current + 0.5);
+    applyView(next, clampPan(panRef.current.x, panRef.current.y, next));
+  }
+
+  function handleZoomOut() {
+    const next = Math.max(MIN_ZOOM, zoomRef.current - 0.5);
+    applyView(next, next === 1 ? { x: 0, y: 0 } : clampPan(panRef.current.x, panRef.current.y, next));
+  }
+
+  const cursor = tool === "bucket" ? "cell" : "crosshair";
 
   return (
     <div className="flex flex-col h-[calc(100dvh-5rem)] bg-lavender select-none">
@@ -152,26 +339,62 @@ export default function DrawingCanvas() {
             }`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/coloringpages/${n}.jpg`}
-              alt={`תבנית ${n}`}
-              className="w-full h-full object-cover"
-            />
+            <img src={`/coloringpages/${n}.jpg`} alt={`תבנית ${n}`} className="w-full h-full object-cover" />
           </button>
         ))}
       </div>
 
-      {/* Canvas */}
-      <div className="flex-1 mx-3 mb-2 rounded-3xl overflow-hidden shadow-xl bg-white">
-        <canvas
-          ref={canvasRef}
-          className="w-full h-full"
-          style={{ touchAction: "none", cursor: "crosshair" }}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
-        />
+      {/* Canvas + zoom overlay */}
+      <div
+        ref={wrapRef}
+        className="flex-1 mx-3 mb-2 relative rounded-3xl overflow-hidden shadow-xl bg-white"
+      >
+        {/* Zoom + pan transform wrapper */}
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            transformOrigin: "center center",
+            willChange: "transform",
+          }}
+        >
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full block"
+            style={{ touchAction: "none", cursor }}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+          />
+        </div>
+
+        {/* Zoom controls overlay — top-right corner */}
+        <div className="absolute top-3 right-3 flex flex-col items-center gap-1 z-10">
+          <button
+            onClick={handleZoomIn}
+            disabled={zoom >= MAX_ZOOM}
+            aria-label="הגדל"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/90 text-ink shadow-md transition-all active:scale-95 disabled:opacity-30"
+          >
+            <ZoomIn size={18} />
+          </button>
+          {zoom > 1 && (
+            <span className="text-[10px] font-black text-ink bg-white/90 rounded-lg px-1 py-0.5 shadow leading-none">
+              ×{zoom % 1 === 0 ? zoom : zoom.toFixed(1)}
+            </span>
+          )}
+          <button
+            onClick={handleZoomOut}
+            disabled={zoom <= MIN_ZOOM}
+            aria-label="הקטן"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/90 text-ink shadow-md transition-all active:scale-95 disabled:opacity-30"
+          >
+            <ZoomOut size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Color palette */}
@@ -192,37 +415,65 @@ export default function DrawingCanvas() {
         ))}
       </div>
 
-      {/* Brush sizes + actions */}
+      {/* Tool toggle + brush sizes + actions */}
       <div className="flex items-center justify-between px-4 py-2 shrink-0 gap-3">
-        {/* Brush sizes */}
         <div className="flex items-center gap-3">
-          {BRUSH_SIZES.map((size) => {
-            const dim = size === 4 ? 16 : size === 10 ? 24 : 34;
-            return (
-              <button
-                key={size}
-                onClick={() => setBrushSize(size)}
-                className={`rounded-full bg-white transition-all shadow ${
-                  brushSize === size ? "ring-2 ring-white ring-offset-2 ring-offset-lavender scale-110" : "opacity-60"
-                }`}
-                style={{ width: dim, height: dim }}
-              />
-            );
-          })}
+          {/* Brush */}
+          <button
+            onClick={() => setTool("brush")}
+            aria-label="מברשת"
+            className={`flex items-center justify-center w-10 h-10 rounded-2xl shadow transition-all ${
+              tool === "brush" ? "bg-ink text-white scale-110" : "bg-white/80 text-ink opacity-60"
+            }`}
+          >
+            <Paintbrush size={20} />
+          </button>
+
+          {/* Bucket */}
+          <button
+            onClick={() => setTool("bucket")}
+            aria-label="דלי צבע"
+            className={`flex items-center justify-center w-10 h-10 rounded-2xl shadow transition-all ${
+              tool === "bucket" ? "bg-ink text-white scale-110" : "bg-white/80 text-ink opacity-60"
+            }`}
+          >
+            <PaintBucket size={20} />
+          </button>
+
+          {/* Brush sizes — only when brush tool active */}
+          {tool === "brush" && (
+            <div className="flex items-center gap-3">
+              {BRUSH_SIZES.map((size) => {
+                const dim = size === 4 ? 16 : size === 10 ? 24 : 34;
+                return (
+                  <button
+                    key={size}
+                    onClick={() => setBrushSize(size)}
+                    className={`rounded-full bg-white transition-all shadow ${
+                      brushSize === size
+                        ? "ring-2 ring-white ring-offset-2 ring-offset-lavender scale-110"
+                        : "opacity-60"
+                    }`}
+                    style={{ width: dim, height: dim }}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        {/* Action buttons */}
+        {/* Actions */}
         <div className="flex gap-2">
           <button
             onClick={handleUndo}
             disabled={!canUndo}
-            className="flex items-center gap-1 bg-white/80 text-ink font-bold px-3 py-2 rounded-2xl shadow disabled:opacity-30"
+            className="flex items-center bg-white/80 text-ink font-bold px-3 py-2 rounded-2xl shadow disabled:opacity-30"
           >
             <Undo2 size={18} />
           </button>
           <button
             onClick={handleClear}
-            className="flex items-center gap-1 bg-white/80 text-ink font-bold px-3 py-2 rounded-2xl shadow"
+            className="flex items-center bg-white/80 text-ink font-bold px-3 py-2 rounded-2xl shadow"
           >
             <Trash2 size={18} />
           </button>

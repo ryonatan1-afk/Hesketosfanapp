@@ -13,41 +13,64 @@
 - Font choices should support Hebrew characters well
 - Do not add English-only UI text; always use Hebrew
 
+## Backlog
+See [BACKLOG.md](BACKLOG.md) for the prioritized list of upcoming features and ideas. Check it at the start of relevant sessions.
+
+## Session End Instructions
+- Before the user clears the chat, always save a memory summary to the project memory folder
+- Update `project_hesketos.md` with any new pages, features, or decisions made during the session
+- Add any new feedback memories if the user corrected your approach
+
 ## App Structure
 ```
 src/
 ├── app/
-│   ├── layout.tsx       ← Root layout (RTL, BottomNav)
-│   ├── page.tsx         ← Home / welcome screen
-│   └── globals.css
+│   ├── layout.tsx          ← Root layout (RTL, floating home button)
+│   ├── page.tsx            ← Home: 2x2 grid of feature tiles
+│   ├── soundboard/         ← Sound buttons with emoji reactions + confetti
+│   ├── quiz/               ← Multiple choice quiz
+│   ├── draw/               ← Canvas drawing tool
+│   ├── gallery/            ← Supabase fan art gallery + upload form
+│   ├── admin/              ← Password-gated artwork approval panel
+│   └── podcast/            ← Placeholder
 └── components/
-    └── BottomNav.tsx    ← Bottom nav: הסכת / חידון / יצירה / גלריה
+    ├── BottomNav.tsx        ← Floating home button (hides on homepage)
+    ├── ArtworkUpload.tsx    ← Fan art upload form
+    ├── DrawingCanvas.tsx    ← Drawing tool
+    └── QuizPlayer.tsx       ← Quiz game
 ```
 
-## Bottom Navigation Tabs
-| Tab | Hebrew | Route | Icon |
-|-----|--------|-------|------|
-| Podcast | הסכת | /podcast | Headphones |
-| Quiz | חידון | /quiz | HelpCircle |
-| Draw | יצירה | /draw | Pencil |
-| Gallery | גלריה | /gallery | Image |
+## Navigation
+- **No bottom nav bar** — replaced with a single floating 🏠 home button
+- Button hides on the homepage, springs in on all other pages
+- All navigation flows: home → feature, then home button back
 
 ## Main Features
 
-### 1. חידון — Quiz
+### 1. לוח צלילים — Soundboard
+- 5 sound buttons with emoji reaction overlays (zoom in + fade out)
+- להיטוס triggers full-screen confetti (canvas-confetti)
+- Files in public/soundboard/
+
+### 2. חידון — Quiz
 - Multiple-choice trivia for kids
 - Questions and answers in Hebrew
 - Fun feedback animations on correct/incorrect answers (Framer Motion)
 
-### 2. יצירה — Drawing
+### 3. יצירה — Drawing
 - In-browser drawing/art creation tool for kids
 - Canvas-based, touch-friendly
 - Kids can save or submit their artwork
 
-### 3. גלריה — Fan Art / Art Gallery
-- Displays artwork created by kids
-- Grid layout, colorful and playful
-- Potentially shows community submissions
+### 4. גלריה — Fan Art / Art Gallery
+- Supabase-backed: kids upload artwork, admin approves it
+- Grid shows only approved artworks
+- Upload form with 5MB guard, Hebrew feedback, image preview
+
+### 5. Admin Panel (/admin)
+- Password-gated (env var ADMIN_PASSWORD)
+- Approve/delete pending artwork without going to Supabase dashboard
+- Uses service role key via server-side API route
 
 ## Design System (extracted from style guide images)
 
@@ -75,7 +98,7 @@ src/
 - **Play button** — large circle, near-black `bg-ink`, centered on screen
 - **Illustration** — cartoon characters pinned to the bottom of the screen
 - **Bottom edge** — layered coral/salmon strip below main content color
-- Use `pb-20` on page content to clear the fixed bottom nav
+- Use `pb-24` on page content to clear the floating home button
 
 ### Component Conventions
 - Big tap targets for children — buttons min `h-16`
