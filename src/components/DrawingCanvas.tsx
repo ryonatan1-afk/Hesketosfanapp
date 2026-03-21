@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 type Tool = "brush" | "bucket";
 
-const TEMPLATES = [1, 2, 3, 4, 5, 6];
+const TEMPLATES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const COLORS = [
   { hex: "#1C1C1E", label: "שָׁחוֹר" },
