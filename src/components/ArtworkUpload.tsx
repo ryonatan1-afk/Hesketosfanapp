@@ -24,7 +24,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
     const selected = e.target.files?.[0] ?? null;
     if (!selected) return;
     if (selected.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-      setErrorMessage(`הקובץ גדול מדי. מקסימום ${MAX_FILE_SIZE_MB} מגה-בייט.`);
+      setErrorMessage(`הַקּוֹבֶץ גָּדוֹל מִדַּי. מַקְסִימוּם ${MAX_FILE_SIZE_MB} מֶגָה-בַּיְט.`);
       setStatus("error");
       return;
     }
@@ -47,7 +47,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
 
     if (storageError) {
       setStatus("error");
-      setErrorMessage("שגיאה בהעלאה. נסו שוב.");
+      setErrorMessage("שְׁגִיאָה בְּהַעֲלָאָה. נַסּוּ שׁוּב.");
       return;
     }
 
@@ -61,7 +61,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
 
     if (dbError) {
       setStatus("error");
-      setErrorMessage("שגיאה בשמירת הציור. נסו שוב.");
+      setErrorMessage("שְׁגִיאָה בִּשְׁמִירַת הַצִּיּוּר. נַסּוּ שׁוּב.");
       return;
     }
 
@@ -74,7 +74,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
 
   return (
     <div className="bg-white/20 rounded-3xl p-5 flex flex-col gap-4">
-      <h2 className="text-white text-2xl font-black text-center">העלאת ציור</h2>
+      <h2 className="text-white text-2xl font-black text-center">הַעֲלָאַת צִיּוּר</h2>
 
       <button
         type="button"
@@ -82,7 +82,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
         className="flex items-center justify-center gap-3 bg-white/30 hover:bg-white/40 active:scale-95 transition-all h-16 rounded-2xl text-white font-bold text-lg"
       >
         <Upload size={24} />
-        <span>בחר ציור</span>
+        <span>בְּחַר צִיּוּר</span>
       </button>
       <input
         ref={inputRef}
@@ -103,7 +103,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={preview}
-              alt="תצוגה מקדימה"
+              alt="תַּצּוּגָה מַקְדִּימָה"
               className="w-full max-h-64 object-contain bg-white"
             />
           </motion.div>
@@ -121,7 +121,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
             disabled={status === "uploading"}
             className="h-16 bg-ink text-white text-xl font-black rounded-2xl shadow-lg disabled:opacity-50 transition-opacity"
           >
-            {status === "uploading" ? "שולח..." : "שלח"}
+            {status === "uploading" ? "שׁוֹלֵחַ..." : "שְׁלַח"}
           </motion.button>
         )}
       </AnimatePresence>
@@ -136,7 +136,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
           >
             <CheckCircle size={28} className="text-white shrink-0" />
             <p className="text-white font-bold text-lg leading-snug">
-              הציור נשלח! הוא יופיע בגלריה אחרי אישור.
+              הַצִּיּוּר נִשְׁלַח! הוּא יוֹפִיעַ בַּגַּלֶרְיָה אַחֲרֵי אִישׁוּר.
             </p>
           </motion.div>
         )}

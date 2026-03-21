@@ -45,7 +45,7 @@ export default function AdminPage() {
       setAuthed(true);
       setArtworks(await res.json());
     } else {
-      setError("סיסמה שגויה");
+      setError("סִיסְמָה שְׁגוּיָה");
     }
   }
 
@@ -73,13 +73,13 @@ export default function AdminPage() {
     return (
       <div className="min-h-[80vh] bg-ink flex flex-col items-center justify-center p-6 gap-6">
         <Lock size={48} className="text-white/40" />
-        <h1 className="text-white text-3xl font-black">ניהול גלריה</h1>
+        <h1 className="text-white text-3xl font-black">נִיהוּל גַּלֶרְיָה</h1>
         <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full max-w-xs">
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="סיסמה"
+            placeholder="סִיסְמָה"
             className="h-14 rounded-2xl px-4 text-lg font-bold text-center bg-white/10 text-white placeholder:text-white/30 border border-white/20 outline-none focus:border-white/60"
           />
           {error && <p className="text-red-400 font-bold text-center">{error}</p>}
@@ -87,7 +87,7 @@ export default function AdminPage() {
             type="submit"
             className="h-14 bg-coral rounded-2xl text-white font-black text-xl"
           >
-            כניסה
+            כְּנִיסָה
           </button>
         </form>
       </div>
@@ -99,18 +99,18 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-[80vh] bg-ink flex flex-col p-4 pb-24">
-      <h1 className="text-white text-3xl font-black text-center py-6">ניהול גלריה</h1>
+      <h1 className="text-white text-3xl font-black text-center py-6">נִיהוּל גַּלֶרְיָה</h1>
 
       {loading ? (
-        <p className="text-white/50 text-center font-bold">טוען...</p>
+        <p className="text-white/50 text-center font-bold">טוֹעֵן...</p>
       ) : (
         <>
           {/* Pending section */}
           <h2 className="text-coral font-black text-xl mb-3">
-            ממתינים לאישור ({pending.length})
+            מְמַתִּינִים לְאִישׁוּר ({pending.length})
           </h2>
           {pending.length === 0 ? (
-            <p className="text-white/40 font-bold mb-6">אין ציורים ממתינים</p>
+            <p className="text-white/40 font-bold mb-6">אֵין צִיּוּרִים מְמַתִּינִים</p>
           ) : (
             <div className="grid grid-cols-2 gap-3 mb-8">
               <AnimatePresence>
@@ -128,10 +128,10 @@ export default function AdminPage() {
 
           {/* Approved section */}
           <h2 className="text-green-400 font-black text-xl mb-3">
-            מאושרים ({approved.length})
+            מְאוּשָׁרִים ({approved.length})
           </h2>
           {approved.length === 0 ? (
-            <p className="text-white/40 font-bold">אין ציורים מאושרים עדיין</p>
+            <p className="text-white/40 font-bold">אֵין צִיּוּרִים מְאוּשָׁרִים עֲדַיִן</p>
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <AnimatePresence>
@@ -171,7 +171,7 @@ function ArtworkCard({
       <div className="aspect-square relative">
         <Image
           src={artwork.image_url}
-          alt="ציור"
+          alt="צִיּוּר"
           fill
           className="object-cover"
         />
@@ -184,7 +184,7 @@ function ArtworkCard({
             className="flex-1 flex items-center justify-center gap-1 bg-green-500 text-white font-black text-sm h-10 rounded-xl"
           >
             <CheckCircle size={16} />
-            <span>אשר</span>
+            <span>אַשֵּׁר</span>
           </motion.button>
         )}
         <motion.button
@@ -193,7 +193,7 @@ function ArtworkCard({
           className="flex-1 flex items-center justify-center gap-1 bg-red-500 text-white font-black text-sm h-10 rounded-xl"
         >
           <Trash2 size={16} />
-          <span>מחק</span>
+          <span>מְחַק</span>
         </motion.button>
       </div>
     </motion.div>

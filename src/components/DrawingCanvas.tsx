@@ -9,16 +9,16 @@ type Tool = "brush" | "bucket";
 const TEMPLATES = [1, 2, 3, 4, 5, 6];
 
 const COLORS = [
-  { hex: "#1C1C1E", label: "שחור" },
-  { hex: "#EF4444", label: "אדום" },
-  { hex: "#F97316", label: "כתום" },
-  { hex: "#F5A820", label: "צהוב" },
-  { hex: "#22C55E", label: "ירוק" },
-  { hex: "#68B8ED", label: "כחול" },
-  { hex: "#9090CC", label: "סגול" },
-  { hex: "#EC4899", label: "ורוד" },
-  { hex: "#92400E", label: "חום" },
-  { hex: "#FFFFFF", label: "לבן" },
+  { hex: "#1C1C1E", label: "שָׁחוֹר" },
+  { hex: "#EF4444", label: "אָדֹם" },
+  { hex: "#F97316", label: "כָּתֹם" },
+  { hex: "#F5A820", label: "צָהֹב" },
+  { hex: "#22C55E", label: "יָרֹק" },
+  { hex: "#68B8ED", label: "כָּחֹל" },
+  { hex: "#9090CC", label: "סָגֹל" },
+  { hex: "#EC4899", label: "וָרֹד" },
+  { hex: "#92400E", label: "חוּם" },
+  { hex: "#FFFFFF", label: "לָבָן" },
 ];
 
 const BRUSH_SIZES = [4, 10, 20];
@@ -368,7 +368,7 @@ export default function DrawingCanvas() {
     try {
       const blob = await getCanvasBlob();
       const file = new File([blob], "הציור-שלי.png", { type: "image/png" });
-      await navigator.share({ title: "הציור שלי", files: [file] });
+      await navigator.share({ title: "הַצִּיּוּר שֶׁלִּי", files: [file] });
     } catch {
       // user cancelled or API unavailable — silent
     }
@@ -402,7 +402,7 @@ export default function DrawingCanvas() {
             }`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/coloringpages/${n}.svg`} alt={`תבנית ${n}`} className="w-full h-full object-cover" />
+            <img src={`/coloringpages/${n}.svg`} alt={`תַּבְנִית ${n}`} className="w-full h-full object-cover" />
           </button>
         ))}
       </div>
@@ -439,7 +439,7 @@ export default function DrawingCanvas() {
           <button
             onClick={handleZoomIn}
             disabled={zoom >= MAX_ZOOM}
-            aria-label="הגדל"
+            aria-label="הַגְדֵּל"
             className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/90 text-ink shadow-md transition-all active:scale-95 disabled:opacity-30"
           >
             <ZoomIn size={18} />
@@ -452,7 +452,7 @@ export default function DrawingCanvas() {
           <button
             onClick={handleZoomOut}
             disabled={zoom <= MIN_ZOOM}
-            aria-label="הקטן"
+            aria-label="הַקְטֵן"
             className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/90 text-ink shadow-md transition-all active:scale-95 disabled:opacity-30"
           >
             <ZoomOut size={18} />
@@ -484,7 +484,7 @@ export default function DrawingCanvas() {
           {/* Brush */}
           <button
             onClick={() => setTool("brush")}
-            aria-label="מברשת"
+            aria-label="מִבְרֶשֶׁת"
             className={`flex items-center justify-center w-10 h-10 rounded-2xl shadow transition-all ${
               tool === "brush" ? "bg-ink text-white scale-110" : "bg-white/80 text-ink opacity-60"
             }`}
@@ -495,7 +495,7 @@ export default function DrawingCanvas() {
           {/* Bucket */}
           <button
             onClick={() => setTool("bucket")}
-            aria-label="דלי צבע"
+            aria-label="דְּלִי צֶבַע"
             className={`flex items-center justify-center w-10 h-10 rounded-2xl shadow transition-all ${
               tool === "bucket" ? "bg-ink text-white scale-110" : "bg-white/80 text-ink opacity-60"
             }`}
@@ -543,7 +543,7 @@ export default function DrawingCanvas() {
           <button
             onClick={handleSendToGallery}
             disabled={galleryStatus === "uploading"}
-            aria-label="שלח לגלריה"
+            aria-label="שְׁלַח לְגַלֶרְיָה"
             className={`flex items-center gap-1.5 font-bold px-3 py-2 rounded-2xl shadow transition-all text-sm ${
               galleryStatus === "success" ? "bg-green-500 text-white" :
               galleryStatus === "error"   ? "bg-red-500 text-white" :
@@ -553,20 +553,20 @@ export default function DrawingCanvas() {
           >
             <Upload size={18} />
             <span>
-              {galleryStatus === "uploading" ? "שולח..." :
-               galleryStatus === "success"   ? "נשלח!" :
-               galleryStatus === "error"     ? "שגיאה" :
-               "גלריה"}
+              {galleryStatus === "uploading" ? "שׁוֹלֵחַ..." :
+               galleryStatus === "success"   ? "נִשְׁלַח!" :
+               galleryStatus === "error"     ? "שְׁגִיאָה" :
+               "גַּלֶרְיָה"}
             </span>
           </button>
           {canNativeShare && (
             <button
               onClick={handleShare}
-              aria-label="שתף"
+              aria-label="שַׁתֵּף"
               className="flex items-center gap-1.5 bg-ink text-white font-bold px-3 py-2 rounded-2xl shadow text-sm"
             >
               <Share2 size={18} />
-              <span>שתף</span>
+              <span>שַׁתֵּף</span>
             </button>
           )}
         </div>

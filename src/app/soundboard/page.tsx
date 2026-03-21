@@ -71,7 +71,7 @@ function playSound(file: string) {
 
       {/* Header */}
       <div className="flex flex-col items-center pt-8 pb-2 px-6 text-center">
-<h1 className="text-white text-5xl font-black leading-tight mt-1">לוח צלילים</h1>
+<h1 className="text-white text-5xl font-black leading-tight mt-1">לוּחַ צְלִילִים</h1>
       </div>
 
 {/* Grid */}

@@ -50,8 +50,8 @@ export default function GalleryPage() {
       <div className="absolute bottom-0 inset-x-0 h-3 bg-yellow rounded-t-full" />
 
       <div className="flex flex-col items-center pt-8 pb-4 px-6 text-center">
-        <p className="text-white/80 text-sm font-bold tracking-widest">יצירות ילדים</p>
-        <h1 className="text-white text-5xl font-black leading-tight mt-1">הגלריה שלנו</h1>
+        <p className="text-white/80 text-sm font-bold tracking-widest">יְצִירוֹת יְלָדִים</p>
+        <h1 className="text-white text-5xl font-black leading-tight mt-1">הַגַּלֶרְיָה שֶׁלָּנוּ</h1>
       </div>
 
       <div className="px-4 mb-6">
@@ -61,7 +61,7 @@ export default function GalleryPage() {
       <div className="px-4 pb-24">
         {loading ? (
           <div className="flex justify-center py-12">
-            <p className="text-white/70 font-bold text-lg">טוען...</p>
+            <p className="text-white/70 font-bold text-lg">טוֹעֵן...</p>
           </div>
         ) : artworks.length === 0 ? (
           <motion.div
@@ -70,8 +70,8 @@ export default function GalleryPage() {
             className="flex flex-col items-center gap-3 py-12 text-center"
           >
             <span className="text-6xl">🎨</span>
-            <p className="text-white text-xl font-black">הגלריה מחכה ליצירות שלכם!</p>
-            <p className="text-white/70 font-bold">העלו ציור ויופיע כאן אחרי אישור</p>
+            <p className="text-white text-xl font-black">הַגַּלֶרְיָה מְחַכָּה לִיצִירוֹת שֶׁלָּכֶם!</p>
+            <p className="text-white/70 font-bold">הַעֲלוּ צִיּוּר וְיוֹפִיעַ כָּאן אַחֲרֵי אִישׁוּר</p>
           </motion.div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
@@ -87,7 +87,7 @@ export default function GalleryPage() {
                 >
                   <Image
                     src={artwork.image_url}
-                    alt="ציור של ילד"
+                    alt="צִיּוּר שֶׁל יֶלֶד"
                     width={400}
                     height={400}
                     className="w-full h-full object-cover"

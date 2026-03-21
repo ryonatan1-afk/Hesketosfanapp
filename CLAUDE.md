@@ -20,6 +20,8 @@ For **Large** tasks: describe the approach and ask for confirmation before writi
 - All UI labels, copy, and navigation are in Hebrew
 - Font choices should support Hebrew characters well
 - Do not add English-only UI text; always use Hebrew
+- **Always add nikud (נִיקּוּד)** to all Hebrew text — vowel diacritics help young kids read and pronounce words
+  - Skip nikud on: brand names ("הסכתוס", "להיטוס"), show-specific catchphrases, filenames, and metadata/SEO strings
 
 ## Backlog
 See [BACKLOG.md](BACKLOG.md) for the prioritized list of upcoming features and ideas. Check it at the start of relevant sessions.

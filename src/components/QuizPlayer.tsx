@@ -58,17 +58,17 @@ export default function QuizPlayer() {
         >
           <span className="text-8xl">⭐</span>
           <h1 className="text-white text-6xl font-black leading-tight drop-shadow">
-            כל הכבוד!
+            כָּל הַכָּבוֹד!
           </h1>
           <p className="text-white text-2xl font-bold">
-            ענית נכון על {score} מתוך {total} שאלות
+            עָנִיתָ נָכוֹן עַל {score} מִתּוֹךְ {total} שְׁאֵלוֹת
           </p>
           <motion.button
             whileTap={{ scale: 0.92 }}
             onClick={handleRestart}
             className="mt-4 bg-white text-yellow text-2xl font-black px-10 py-5 rounded-3xl shadow-lg"
           >
-            שחק שוב
+            שַׂחַק שׁוּב
           </motion.button>
         </motion.div>
       </div>
@@ -162,7 +162,7 @@ export default function QuizPlayer() {
                 onClick={handleNext}
                 className="mt-2 bg-ink text-white text-xl font-black py-5 rounded-3xl shadow-lg"
               >
-                {currentIndex + 1 >= total ? "סיום ✓" : "הבא ←"}
+                {currentIndex + 1 >= total ? "סִיּוּם ✓" : "הַבָּא ←"}
               </motion.button>
             )}
           </AnimatePresence>
