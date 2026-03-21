@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Undo2, Trash2, Download, Paintbrush, PaintBucket, ZoomIn, ZoomOut } from "lucide-react";
+import { Undo2, Trash2, Upload, Share2, Paintbrush, PaintBucket, ZoomIn, ZoomOut } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 type Tool = "brush" | "bucket";
 
@@ -143,8 +144,17 @@ export default function DrawingCanvas() {
   const [selectedTemplate, setSelectedTemplate] = useState(1);
   const [color,     setColor]     = useState("#1C1C1E");
   const [brushSize, setBrushSize] = useState(10);
-  const [canUndo,   setCanUndo]   = useState(false);
-  const [tool,      setTool]      = useState<Tool>("brush");
+  const [canUndo,       setCanUndo]       = useState(false);
+  const [tool,          setTool]          = useState<Tool>("brush");
+  const [galleryStatus, setGalleryStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
+  const [canNativeShare, setCanNativeShare] = useState(false);
+
+  // Detect native share support (files) on mount
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !navigator.share) return;
+    const testFile = new File([""], "test.png", { type: "image/png" });
+    setCanNativeShare(navigator.canShare?.({ files: [testFile] }) ?? true);
+  }, []);
 
   // Keep state and refs in sync
   function applyView(newZoom: number, newPan: { x: number; y: number }) {
@@ -319,13 +329,49 @@ export default function DrawingCanvas() {
     loadTemplate(selectedTemplate);
   }
 
-  function handleSave() {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const link = document.createElement("a");
-    link.download = "הציור-שלי.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+  function getCanvasBlob(): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return reject(new Error("no canvas"));
+      canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("toBlob failed")), "image/png");
+    });
+  }
+
+  async function handleSendToGallery() {
+    if (galleryStatus === "uploading") return;
+    setGalleryStatus("uploading");
+    try {
+      const blob = await getCanvasBlob();
+      const filePath = `${crypto.randomUUID()}.png`;
+
+      const { error: storageError } = await supabase.storage
+        .from("artworks")
+        .upload(filePath, blob, { contentType: "image/png", cacheControl: "3600", upsert: false });
+      if (storageError) throw storageError;
+
+      const { data: urlData } = supabase.storage.from("artworks").getPublicUrl(filePath);
+
+      const { error: dbError } = await supabase
+        .from("artworks")
+        .insert({ image_url: urlData.publicUrl });
+      if (dbError) throw dbError;
+
+      setGalleryStatus("success");
+    } catch {
+      setGalleryStatus("error");
+    } finally {
+      setTimeout(() => setGalleryStatus("idle"), 3000);
+    }
+  }
+
+  async function handleShare() {
+    try {
+      const blob = await getCanvasBlob();
+      const file = new File([blob], "הציור-שלי.png", { type: "image/png" });
+      await navigator.share({ title: "הציור שלי", files: [file] });
+    } catch {
+      // user cancelled or API unavailable — silent
+    }
   }
 
   function handleZoomIn() {
@@ -495,12 +541,34 @@ export default function DrawingCanvas() {
             <Trash2 size={18} />
           </button>
           <button
-            onClick={handleSave}
-            className="flex items-center gap-2 bg-ink text-white font-bold px-4 py-2 rounded-2xl shadow"
+            onClick={handleSendToGallery}
+            disabled={galleryStatus === "uploading"}
+            aria-label="שלח לגלריה"
+            className={`flex items-center gap-1.5 font-bold px-3 py-2 rounded-2xl shadow transition-all text-sm ${
+              galleryStatus === "success" ? "bg-green-500 text-white" :
+              galleryStatus === "error"   ? "bg-red-500 text-white" :
+              galleryStatus === "uploading" ? "bg-white/80 text-ink opacity-60" :
+              "bg-white/80 text-ink"
+            }`}
           >
-            <Download size={18} />
-            <span className="text-sm">שמור</span>
+            <Upload size={18} />
+            <span>
+              {galleryStatus === "uploading" ? "שולח..." :
+               galleryStatus === "success"   ? "נשלח!" :
+               galleryStatus === "error"     ? "שגיאה" :
+               "גלריה"}
+            </span>
           </button>
+          {canNativeShare && (
+            <button
+              onClick={handleShare}
+              aria-label="שתף"
+              className="flex items-center gap-1.5 bg-ink text-white font-bold px-3 py-2 rounded-2xl shadow text-sm"
+            >
+              <Share2 size={18} />
+              <span>שתף</span>
+            </button>
+          )}
         </div>
       </div>
 
