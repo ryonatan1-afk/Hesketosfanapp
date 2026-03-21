@@ -1,5 +1,13 @@
 # Hesketos — Project Reference
 
+## Effort Estimates
+Before starting any task, always give a quick effort label:
+- **Small** — a few lines, done in seconds (e.g. color change, typo fix)
+- **Medium** — one focused change, a few minutes (e.g. new button, handler)
+- **Large** — multiple files, tooling, or research involved (e.g. new feature, image pipeline)
+
+For **Large** tasks: describe the approach and ask for confirmation before writing any code.
+
 ## Tech Stack
 - **Framework**: Next.js 16 (App Router, TypeScript)
 - **Styling**: Tailwind CSS v4
