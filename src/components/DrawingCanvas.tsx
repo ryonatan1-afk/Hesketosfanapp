@@ -27,6 +27,9 @@ const MAX_ZOOM = 5;
 
 // getBoundingClientRect accounts for CSS transforms, so this correctly maps
 // screen pointer coordinates → canvas pixel coordinates even when zoomed/panned.
+// We use clientX/Y (visual-viewport-relative) and rect.left/top (also visual-viewport-
+// relative), which cancels any page scroll. The dir="ltr" on the wrapper prevents
+// RTL scrollLeft from shifting the rect on iOS Safari.
 function getCanvasPos(canvas: HTMLCanvasElement, e: React.PointerEvent) {
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
@@ -387,7 +390,7 @@ export default function DrawingCanvas() {
   const cursor = tool === "bucket" ? "cell" : "crosshair";
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-6rem)] bg-lavender select-none">
+    <div dir="ltr" className="flex flex-col h-[calc(100dvh-6rem)] bg-lavender select-none">
 
       {/* Template picker */}
       <div className="flex gap-3 px-3 py-2 overflow-x-auto shrink-0 bg-lavender" dir="ltr">
@@ -410,6 +413,7 @@ export default function DrawingCanvas() {
       {/* Canvas + zoom overlay */}
       <div
         ref={wrapRef}
+        dir="ltr"
         className="flex-1 mx-3 mb-2 relative rounded-3xl overflow-hidden shadow-xl bg-white"
       >
         {/* Zoom + pan transform wrapper */}
