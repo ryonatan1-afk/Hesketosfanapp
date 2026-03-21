@@ -123,6 +123,8 @@ export default function DrawingCanvas() {
   const undoStack     = useRef<ImageData[]>([]);
   const isFirstMount  = useRef(true);
 
+  const dprRef        = useRef(1);
+
   // Pinch gesture tracking
   const ptrs          = useRef<Map<number, { x: number; y: number }>>(new Map());
   const pinchDist0    = useRef<number | null>(null);
@@ -187,8 +189,10 @@ export default function DrawingCanvas() {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    canvas.width  = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    const dpr = window.devicePixelRatio || 1;
+    dprRef.current = dpr;
+    canvas.width  = canvas.offsetWidth  * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
     loadTemplate(selectedTemplate);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -270,7 +274,7 @@ export default function DrawingCanvas() {
       ctx.beginPath();
       ctx.moveTo(pendingPos.current.x, pendingPos.current.y);
       ctx.strokeStyle = color;
-      ctx.lineWidth   = brushSize;
+      ctx.lineWidth   = brushSize * dprRef.current;
       ctx.lineJoin    = "round";
       ctx.lineCap     = "round";
       pendingPos.current = null;
