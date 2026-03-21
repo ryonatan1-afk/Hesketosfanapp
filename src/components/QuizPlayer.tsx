@@ -11,14 +11,55 @@ const OPTION_COLORS = [
   "bg-yellow",
 ] as const;
 
-// Use the first quiz by default — can be made a prop later
-const quiz = quizzes[0];
-
 export default function QuizPlayer() {
+  const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+
+  const quiz = quizzes.find((q) => q.id === selectedQuizId) ?? null;
+
+  function handleSelectQuiz(id: string) {
+    setSelectedQuizId(id);
+    setCurrentIndex(0);
+    setSelected(null);
+    setScore(0);
+    setFinished(false);
+  }
+
+  function handleBack() {
+    setSelectedQuizId(null);
+    setCurrentIndex(0);
+    setSelected(null);
+    setScore(0);
+    setFinished(false);
+  }
+
+  // Episode selector screen
+  if (!quiz) {
+    return (
+      <div className="min-h-[80vh] bg-blue flex flex-col p-6 pb-24 relative overflow-hidden">
+        <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
+        <h1 className="text-white text-4xl font-black text-center mb-8 mt-4 drop-shadow">
+          בְּחַר פֶּרֶק
+        </h1>
+        <div className="flex flex-col gap-4">
+          {quizzes.map((q) => (
+            <motion.button
+              key={q.id}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => handleSelectQuiz(q.id)}
+              className="bg-white rounded-3xl px-6 py-5 text-right shadow-md"
+            >
+              <p className="text-blue text-sm font-bold opacity-70">{q.episodeLabel}</p>
+              <p className="text-ink text-xl font-black mt-1">{q.title}</p>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const question = quiz.questions[currentIndex];
   const total = quiz.questions.length;
@@ -63,13 +104,22 @@ export default function QuizPlayer() {
           <p className="text-white text-2xl font-bold">
             עָנִיתָ נָכוֹן עַל {score} מִתּוֹךְ {total} שְׁאֵלוֹת
           </p>
-          <motion.button
-            whileTap={{ scale: 0.92 }}
-            onClick={handleRestart}
-            className="mt-4 bg-white text-yellow text-2xl font-black px-10 py-5 rounded-3xl shadow-lg"
-          >
-            שַׂחַק שׁוּב
-          </motion.button>
+          <div className="flex gap-4 flex-wrap justify-center">
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={handleRestart}
+              className="mt-4 bg-white text-yellow text-2xl font-black px-10 py-5 rounded-3xl shadow-lg"
+            >
+              שַׂחַק שׁוּב
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              onClick={handleBack}
+              className="mt-4 bg-ink text-white text-2xl font-black px-10 py-5 rounded-3xl shadow-lg"
+            >
+              פְּרָקִים
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     );
@@ -88,8 +138,14 @@ export default function QuizPlayer() {
         />
       </div>
 
-      {/* Episode + counter */}
+      {/* Back + episode label + counter */}
       <div className="flex justify-between items-center mb-4">
+        <button
+          onClick={handleBack}
+          className="text-white/80 text-sm font-bold"
+        >
+          ← פְּרָקִים
+        </button>
         <span className="text-white/80 text-sm font-bold">{quiz.episodeLabel}</span>
         <span className="text-white/80 text-sm font-bold">
           {currentIndex + 1} / {total}

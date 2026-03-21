@@ -38,6 +38,13 @@ export default function HomePage() {
           </motion.div>
         ))}
       </div>
+
+      <a
+        href="mailto:hesketosfanapp@gmail.com"
+        className="text-white/70 text-sm font-bold underline underline-offset-4 pb-4"
+      >
+        ✉️ שִׁלְחוּ פִידְבַּק
+      </a>
     </div>
   );
 }
