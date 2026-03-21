@@ -13,6 +13,12 @@ const heebo = Heebo({
 export const metadata: Metadata = {
   title: "הסכתוס",
   description: "פודקאסט לילדים",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "הסכתוס",
+  },
 };
 
 export default function RootLayout({
@@ -23,6 +29,15 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" className={`${heebo.variable} h-full`}>
       <head>
+        <meta name="theme-color" content="#68B8ED" />
+        <link rel="apple-touch-icon" href="/icons/icon.svg" />
+        <Script
+          id="register-sw"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`,
+          }}
+        />
         <Script
           id="gtm-script"
           strategy="afterInteractive"

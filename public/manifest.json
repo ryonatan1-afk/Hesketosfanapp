@@ -1,0 +1,20 @@
+{
+  "name": "הסכתוס",
+  "short_name": "הסכתוס",
+  "description": "אתר המעריצים הלא רשמי של הסכתוס",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#68B8ED",
+  "theme_color": "#68B8ED",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

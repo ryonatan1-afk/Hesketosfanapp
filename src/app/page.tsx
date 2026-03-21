@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import InstallBanner from "@/components/InstallBanner";
 
 const tiles = [
   { emoji: "🔊", label: "לוּחַ צְלִילִים", href: "/soundboard", bg: "bg-pink-400"   },
@@ -14,6 +15,7 @@ export default function HomePage() {
   return (
     <div className="min-h-[80vh] bg-blue flex flex-col items-center justify-center gap-6 p-6 relative overflow-hidden">
       <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
+      <InstallBanner />
 
       <h1 className="text-white text-4xl font-black text-center leading-snug">הסכתוס<br /><span className="text-2xl font-bold opacity-80">אֲתַר הַמַּעֲרִיצִים הַלֹּא רַשְׁמִי</span></h1>
 
