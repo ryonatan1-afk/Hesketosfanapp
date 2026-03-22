@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { trackEvent } from "@/lib/analytics";
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export default function BottomNav() {
           <motion.div whileTap={{ scale: 0.85 }} className="pointer-events-auto">
             <Link
               href="/"
+              onClick={() => trackEvent("home_button_clicked", { from_page: pathname })}
               className="w-16 h-16 rounded-full bg-white shadow-xl flex items-center justify-center"
             >
               <Home size={28} className="text-ink" strokeWidth={2.5} />

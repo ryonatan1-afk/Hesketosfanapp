@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Info, X } from "lucide-react";
 import InstallBanner from "@/components/InstallBanner";
+import { trackEvent } from "@/lib/analytics";
 
 const tiles = [
   { emoji: "🔊", label: "לוּחַ צְלִילִים", href: "/soundboard", bg: "bg-pink-400"   },
@@ -26,7 +27,7 @@ export default function HomePage() {
 
       {/* Info icon — top-left corner */}
       <button
-        onClick={() => setShowDisclaimer(true)}
+        onClick={() => { setShowDisclaimer(true); trackEvent("disclaimer_open"); }}
         aria-label="אודות האתר"
         className="absolute top-4 left-4 text-white/50 hover:text-white/90 transition-colors"
       >
@@ -46,6 +47,7 @@ export default function HomePage() {
           >
             <Link
               href={tile.href}
+              onClick={() => trackEvent("tile_click", { tile: tile.href.replace("/", "") })}
               className={`${tile.bg} rounded-3xl shadow-xl flex flex-col items-center justify-center gap-3 aspect-square w-full`}
             >
               <span className="text-6xl">{tile.emoji}</span>
@@ -57,6 +59,7 @@ export default function HomePage() {
 
       <a
         href="mailto:hesketosfanapp@gmail.com"
+        onClick={() => trackEvent("feedback_click")}
         className="text-white/70 text-sm font-bold underline underline-offset-4 pb-4"
       >
         ✉️ שִׁלְחוּ פִידְבַּק
@@ -89,7 +92,7 @@ export default function HomePage() {
                 {DISCLAIMER}
               </p>
               <button
-                onClick={() => setShowDisclaimer(false)}
+                onClick={() => { setShowDisclaimer(false); trackEvent("disclaimer_close"); }}
                 className="mt-6 w-full bg-ink text-white font-black text-lg py-4 rounded-2xl flex items-center justify-center gap-2"
               >
                 <X size={18} />

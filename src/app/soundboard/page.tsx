@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { trackEvent } from "@/lib/analytics";
 
 interface Sound {
   file: string;
@@ -42,6 +43,7 @@ function playSound(file: string) {
     if (file === "lahitos.mp3") fireConfetti();
 
     const sound = sounds.find((s) => s.file === file);
+    trackEvent("sound_played", { sound_name: sound?.label ?? file });
     if (sound?.emoji) {
       setActiveEmoji(sound.emoji);
       setEmojiKey((k) => k + 1);

@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Undo2, Trash2, Upload, Share2, Paintbrush, PaintBucket, ZoomIn, ZoomOut } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { trackEvent } from "@/lib/analytics";
 
 type Tool = "brush" | "bucket";
 
@@ -331,6 +332,7 @@ export default function DrawingCanvas() {
   }
 
   function handleClear() {
+    trackEvent("draw_canvas_cleared", { template: selectedTemplate });
     loadTemplate(selectedTemplate);
   }
 
@@ -361,6 +363,7 @@ export default function DrawingCanvas() {
         .insert({ image_url: urlData.publicUrl });
       if (dbError) throw dbError;
 
+      trackEvent("draw_sent_to_gallery", { template: selectedTemplate });
       setGalleryStatus("success");
     } catch {
       setGalleryStatus("error");
@@ -370,6 +373,7 @@ export default function DrawingCanvas() {
   }
 
   async function handleShare() {
+    trackEvent("draw_shared");
     try {
       const blob = await getCanvasBlob();
       const file = new File([blob], "הציור-שלי.png", { type: "image/png" });
@@ -399,7 +403,7 @@ export default function DrawingCanvas() {
         {TEMPLATES.map((n) => (
           <button
             key={n}
-            onClick={() => setSelectedTemplate(n)}
+            onClick={() => { setSelectedTemplate(n); trackEvent("draw_template_selected", { template: n }); }}
             className={`shrink-0 w-14 h-14 rounded-2xl overflow-hidden border-4 transition-all ${
               selectedTemplate === n
                 ? "border-white scale-110 shadow-lg"
@@ -494,6 +498,7 @@ export default function DrawingCanvas() {
                 if (tool === "brush") {
                   setShowSizePicker((s) => !s);
                 } else {
+                  trackEvent("draw_tool_changed", { tool: "brush" });
                   setTool("brush");
                   setShowSizePicker(false);
                 }
@@ -528,7 +533,7 @@ export default function DrawingCanvas() {
 
           {/* Bucket */}
           <button
-            onClick={() => { setTool("bucket"); setShowSizePicker(false); }}
+            onClick={() => { trackEvent("draw_tool_changed", { tool: "bucket" }); setTool("bucket"); setShowSizePicker(false); }}
             aria-label="דְּלִי צֶבַע"
             className={`flex items-center justify-center w-10 h-10 rounded-2xl shadow transition-all ${
               tool === "bucket" ? "bg-ink text-white scale-110" : "bg-white/80 text-ink opacity-60"

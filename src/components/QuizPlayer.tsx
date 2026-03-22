@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { quizzes } from "@/data/quizzes";
+import { trackEvent } from "@/lib/analytics";
 
 const OPTION_COLORS = [
   "bg-blue",
@@ -21,6 +22,8 @@ export default function QuizPlayer() {
   const quiz = quizzes.find((q) => q.id === selectedQuizId) ?? null;
 
   function handleSelectQuiz(id: string) {
+    const q = quizzes.find((q) => q.id === id);
+    trackEvent("quiz_episode_selected", { episode_id: id, episode_label: q?.episodeLabel });
     setSelectedQuizId(id);
     setCurrentIndex(0);
     setSelected(null);
@@ -29,6 +32,7 @@ export default function QuizPlayer() {
   }
 
   function handleBack() {
+    trackEvent("quiz_back_to_episodes", { episode_id: selectedQuizId });
     setSelectedQuizId(null);
     setCurrentIndex(0);
     setSelected(null);
@@ -70,12 +74,19 @@ export default function QuizPlayer() {
 
   function handleSelect(index: number) {
     if (isAnswered) return;
+    const isCorrect = index === question.correctIndex;
+    trackEvent("quiz_answer_submitted", {
+      episode_id: selectedQuizId,
+      question_index: currentIndex,
+      is_correct: isCorrect,
+    });
     setSelected(index);
-    if (index === question.correctIndex) setScore((s) => s + 1);
+    if (isCorrect) setScore((s) => s + 1);
   }
 
   function handleNext() {
     if (currentIndex + 1 >= total) {
+      trackEvent("quiz_completed", { episode_id: selectedQuizId, score, total });
       setFinished(true);
     } else {
       setCurrentIndex((i) => i + 1);
@@ -84,6 +95,7 @@ export default function QuizPlayer() {
   }
 
   function handleRestart() {
+    trackEvent("quiz_restarted", { episode_id: selectedQuizId });
     setCurrentIndex(0);
     setSelected(null);
     setScore(0);

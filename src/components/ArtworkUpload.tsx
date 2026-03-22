@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { trackEvent } from "@/lib/analytics";
 
 type Status = "idle" | "uploading" | "success" | "error";
 
@@ -28,6 +29,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
       setStatus("error");
       return;
     }
+    trackEvent("gallery_file_selected");
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
     setStatus("idle");
@@ -36,6 +38,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
 
   async function handleSubmit() {
     if (!file) return;
+    trackEvent("gallery_upload_submitted");
     setStatus("uploading");
 
     const ext = file.name.split(".").pop() ?? "png";
@@ -46,6 +49,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
       .upload(path, file, { cacheControl: "3600", upsert: false });
 
     if (storageError) {
+      trackEvent("gallery_upload_error", { stage: "storage" });
       setStatus("error");
       setErrorMessage("שְׁגִיאָה בְּהַעֲלָאָה. נַסּוּ שׁוּב.");
       return;
@@ -60,11 +64,13 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
       .insert({ image_url: urlData.publicUrl });
 
     if (dbError) {
+      trackEvent("gallery_upload_error", { stage: "database" });
       setStatus("error");
       setErrorMessage("שְׁגִיאָה בִּשְׁמִירַת הַצִּיּוּר. נַסּוּ שׁוּב.");
       return;
     }
 
+    trackEvent("gallery_upload_success");
     setStatus("success");
     setFile(null);
     setPreview(null);
