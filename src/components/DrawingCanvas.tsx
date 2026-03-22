@@ -152,6 +152,8 @@ export default function DrawingCanvas() {
   const [tool,          setTool]          = useState<Tool>("brush");
   const [showSizePicker, setShowSizePicker] = useState(false);
   const [galleryStatus, setGalleryStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [createdBy, setCreatedBy] = useState("");
   const [canNativeShare, setCanNativeShare] = useState(false);
 
   // Detect native share support (files) on mount
@@ -344,8 +346,13 @@ export default function DrawingCanvas() {
     });
   }
 
-  async function handleSendToGallery() {
+  function handleSendToGallery() {
     if (galleryStatus === "uploading") return;
+    setShowNameModal(true);
+  }
+
+  async function submitToGallery() {
+    setShowNameModal(false);
     setGalleryStatus("uploading");
     try {
       const blob = await getCanvasBlob();
@@ -360,11 +367,12 @@ export default function DrawingCanvas() {
 
       const { error: dbError } = await supabase
         .from("artworks")
-        .insert({ image_url: urlData.publicUrl });
+        .insert({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null });
       if (dbError) throw dbError;
 
       trackEvent("draw_sent_to_gallery", { template: selectedTemplate });
       setGalleryStatus("success");
+      setCreatedBy("");
     } catch {
       setGalleryStatus("error");
     } finally {
@@ -396,7 +404,7 @@ export default function DrawingCanvas() {
   const cursor = tool === "bucket" ? "cell" : "crosshair";
 
   return (
-    <div dir="ltr" className="flex flex-col h-[calc(100dvh-6rem)] bg-lavender select-none">
+    <div dir="ltr" className="relative flex flex-col h-[calc(100dvh-6rem)] bg-lavender select-none">
 
       {/* Template picker */}
       <div className="flex gap-3 px-3 py-2 overflow-x-auto shrink-0 bg-lavender" dir="ltr">
@@ -590,6 +598,35 @@ export default function DrawingCanvas() {
         </div>
       </div>
 
+      {/* Name modal */}
+      {showNameModal && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/50 px-6">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-xs flex flex-col gap-4 shadow-2xl">
+            <h2 className="text-ink text-xl font-black text-center">מִי צִיֵּר אֶת זֶה?</h2>
+            <input
+              type="text"
+              value={createdBy}
+              onChange={(e) => setCreatedBy(e.target.value)}
+              placeholder="שֵׁם הַיּוֹצֵר (לֹא חוֹבָה)"
+              maxLength={40}
+              autoFocus
+              className="h-14 rounded-2xl px-4 text-lg font-bold text-right bg-gray-100 text-ink placeholder:text-ink/40 outline-none focus:ring-2 focus:ring-lavender"
+            />
+            <button
+              onClick={submitToGallery}
+              className="h-14 bg-ink text-white text-xl font-black rounded-2xl"
+            >
+              שְׁלַח לְגַלֶרְיָה
+            </button>
+            <button
+              onClick={() => { setShowNameModal(false); setCreatedBy(""); }}
+              className="text-ink/50 font-bold text-base"
+            >
+              בִּיטּוּל
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

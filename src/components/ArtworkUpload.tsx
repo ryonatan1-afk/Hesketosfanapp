@@ -20,6 +20,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [createdBy, setCreatedBy] = useState<string>("");
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] ?? null;
@@ -61,7 +62,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
 
     const { error: dbError } = await supabase
       .from("artworks")
-      .insert({ image_url: urlData.publicUrl });
+      .insert({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null });
 
     if (dbError) {
       trackEvent("gallery_upload_error", { stage: "database" });
@@ -74,6 +75,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
     setStatus("success");
     setFile(null);
     setPreview(null);
+    setCreatedBy("");
     if (inputRef.current) inputRef.current.value = "";
     onUploadSuccess();
   }
@@ -115,6 +117,15 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <input
+        type="text"
+        value={createdBy}
+        onChange={(e) => setCreatedBy(e.target.value)}
+        placeholder="שֵׁם הַיּוֹצֵר (לֹא חוֹבָה)"
+        maxLength={40}
+        className="h-14 rounded-2xl px-4 text-lg font-bold text-right bg-white/30 text-white placeholder:text-white/60 outline-none focus:bg-white/40 transition-colors"
+      />
 
       <AnimatePresence>
         {file && status !== "success" && (

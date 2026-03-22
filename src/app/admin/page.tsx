@@ -10,6 +10,7 @@ interface Artwork {
   image_url: string;
   created_at: string;
   approved: boolean;
+  created_by: string | null;
 }
 
 export default function AdminPage() {
@@ -176,6 +177,11 @@ function ArtworkCard({
           className="object-cover"
         />
       </div>
+      {artwork.created_by && (
+        <p className="text-white/60 text-xs font-bold text-center px-2 pt-1 truncate">
+          מאת {artwork.created_by}
+        </p>
+      )}
       <div className="flex gap-2 p-2">
         {onApprove && (
           <motion.button

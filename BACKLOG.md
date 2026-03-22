@@ -6,7 +6,7 @@ Items are roughly priority-ordered within each section. Move things to **Done** 
 - [x] Fix homepage bottom — too much white space
 - [x] Quiz: add more questions + filter by episode or randomize
 - [x] Coloring page: zoom in/out for precision, replace Save with Share button
-- [ ] Gallery: optional "made by" field displayed as small "by X" on artwork
+- [x] Gallery: optional "made by" field displayed as small "by X" on artwork
 
 ## Ideas / Nice to Have
 - [ ] Stickers section — downloadable WhatsApp sticker packs

@@ -10,6 +10,7 @@ interface Artwork {
   id: string;
   image_url: string;
   created_at: string;
+  created_by: string | null;
 }
 
 const cardVariants = {
@@ -35,7 +36,7 @@ export default function GalleryPage() {
     setLoading(true);
     const { data } = await supabase
       .from("artworks")
-      .select("id, image_url, created_at")
+      .select("id, image_url, created_at, created_by")
       .order("created_at", { ascending: false });
     setArtworks(data ?? []);
     setLoading(false);
@@ -83,15 +84,22 @@ export default function GalleryPage() {
                   variants={cardVariants}
                   initial="hidden"
                   animate="visible"
-                  className="rounded-3xl overflow-hidden shadow-lg bg-white aspect-square"
+                  className="rounded-3xl overflow-hidden shadow-lg bg-white flex flex-col"
                 >
-                  <Image
-                    src={artwork.image_url}
-                    alt="צִיּוּר שֶׁל יֶלֶד"
-                    width={400}
-                    height={400}
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="aspect-square">
+                    <Image
+                      src={artwork.image_url}
+                      alt="צִיּוּר שֶׁל יֶלֶד"
+                      width={400}
+                      height={400}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {artwork.created_by && (
+                    <p className="text-center text-xs font-bold text-ink/60 py-1.5 px-2 truncate">
+                      מאת {artwork.created_by}
+                    </p>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
