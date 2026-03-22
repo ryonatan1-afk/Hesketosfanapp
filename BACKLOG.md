@@ -3,14 +3,14 @@
 Items are roughly priority-ordered within each section. Move things to **Done** when shipped.
 
 ## High Priority
-- [ ] Fix homepage bottom — too much white space
+- [x] Fix homepage bottom — too much white space
 - [x] Quiz: add more questions + filter by episode or randomize
 - [x] Coloring page: zoom in/out for precision, replace Save with Share button
 - [ ] Gallery: optional "made by" field displayed as small "by X" on artwork
 
 ## Ideas / Nice to Have
 - [ ] Stickers section — downloadable WhatsApp sticker packs
-- [ ] "Created by" page + feedback email contact
+- [x] "Created by" page + feedback email contact
 - [ ] Podcast page — embed or stream actual podcast episodes
 
 ## Claude's Ideas
