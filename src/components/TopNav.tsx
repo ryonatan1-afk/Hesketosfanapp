@@ -25,7 +25,11 @@ export default function TopNav() {
           <button
             onClick={() => {
               trackEvent("back_button_clicked", { from_page: pathname });
-              router.back();
+              if (window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/");
+              }
             }}
             aria-label="חֲזוֹר"
             className="w-10 h-10 flex items-center justify-center rounded-2xl bg-black/20 text-white backdrop-blur-sm"

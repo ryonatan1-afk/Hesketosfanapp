@@ -7,7 +7,7 @@ import { trackEvent } from "@/lib/analytics";
 
 type Tool = "brush" | "bucket";
 
-const TEMPLATES = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const TEMPLATES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 const COLORS = [
   { hex: "#1C1C1E", label: "שָׁחוֹר" },
@@ -149,7 +149,7 @@ export default function DrawingCanvas() {
   const [color,     setColor]     = useState("#1C1C1E");
   const [brushSize, setBrushSize] = useState(10);
   const [canUndo,       setCanUndo]       = useState(false);
-  const [tool,          setTool]          = useState<Tool>("brush");
+  const [tool,          setTool]          = useState<Tool>("bucket");
   const [showSizePicker, setShowSizePicker] = useState(false);
   const [galleryStatus, setGalleryStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
   const [showNameModal, setShowNameModal] = useState(false);
@@ -193,6 +193,13 @@ export default function DrawingCanvas() {
     const canvas = canvasRef.current;
     const ctx = getCtx();
     if (!canvas || !ctx) return;
+    if (n === 0) {
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      undoStack.current = [];
+      setCanUndo(false);
+      return;
+    }
     const img = new Image();
     img.src = `/coloringpages/${n}.svg`;
     img.onload = () => {
@@ -411,15 +418,19 @@ export default function DrawingCanvas() {
         {TEMPLATES.map((n) => (
           <button
             key={n}
-            onClick={() => { setSelectedTemplate(n); trackEvent("draw_template_selected", { template: n }); }}
+            onClick={() => { setSelectedTemplate(n); if (n === 0) setTool("brush"); trackEvent("draw_template_selected", { template: n }); }}
             className={`shrink-0 w-14 h-14 rounded-2xl overflow-hidden border-4 transition-all ${
               selectedTemplate === n
                 ? "border-white scale-110 shadow-lg"
                 : "border-transparent opacity-60"
             }`}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/coloringpages/${n}.svg`} alt={`תַּבְנִית ${n}`} className="w-full h-full object-cover" />
+            {n === 0 ? (
+              <div className="w-full h-full bg-white flex items-center justify-center text-2xl">✏️</div>
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={`/coloringpages/${n}.svg`} alt={`תַּבְנִית ${n}`} className="w-full h-full object-cover" />
+            )}
           </button>
         ))}
       </div>

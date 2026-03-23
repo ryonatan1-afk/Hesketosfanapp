@@ -32,8 +32,13 @@ export default function SoundboardPage() {
   const audiosRef = useRef<HTMLAudioElement[]>([]);
   const [emojiKey, setEmojiKey] = useState(0);
   const [activeEmoji, setActiveEmoji] = useState<string | null>(null);
+  const [cooldowns, setCooldowns] = useState<Record<string, boolean>>({});
 
-function playSound(file: string) {
+  const COOLDOWN_MS = 4000;
+
+  function playSound(file: string) {
+    if (cooldowns[file]) return;
+
     const audio = new Audio(`/soundboard/${file}`);
     audiosRef.current.push(audio);
     audio.play();
@@ -50,6 +55,9 @@ function playSound(file: string) {
       setEmojiKey((k) => k + 1);
       setTimeout(() => setActiveEmoji(null), 1200);
     }
+
+    setCooldowns((prev) => ({ ...prev, [file]: true }));
+    setTimeout(() => setCooldowns((prev) => ({ ...prev, [file]: false })), COOLDOWN_MS);
   }
 
   return (
@@ -85,9 +93,9 @@ function playSound(file: string) {
             initial={{ opacity: 0, scale: 0.7 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 18 }}
-            whileTap={{ scale: 0.9 }}
+            whileTap={cooldowns[sound.file] ? {} : { scale: 0.9 }}
             onClick={() => playSound(sound.file)}
-            className={`${sound.bg} rounded-3xl shadow-xl aspect-square flex flex-col items-center justify-center gap-3 p-4`}
+            className={`${sound.bg} rounded-3xl shadow-xl aspect-square flex flex-col items-center justify-center gap-3 p-4 transition-opacity duration-300 ${cooldowns[sound.file] ? "opacity-40 cursor-not-allowed" : ""}`}
           >
             <Volume2 size={36} className="text-white drop-shadow" strokeWidth={2.5} />
             <span className="text-white text-xl font-black text-center leading-tight drop-shadow">
