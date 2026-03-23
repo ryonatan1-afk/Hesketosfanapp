@@ -404,7 +404,7 @@ export default function DrawingCanvas() {
   const cursor = tool === "bucket" ? "cell" : "crosshair";
 
   return (
-    <div dir="ltr" className="relative flex flex-col h-[calc(100dvh-6rem)] bg-lavender select-none">
+    <div dir="ltr" className="relative flex flex-col h-[calc(100dvh-3.5rem)] bg-lavender select-none">
 
       {/* Template picker */}
       <div className="flex gap-3 px-3 py-2 overflow-x-auto shrink-0 bg-lavender" dir="ltr">

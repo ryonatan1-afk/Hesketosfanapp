@@ -99,7 +99,7 @@ export default function AdminPage() {
   const approved = artworks.filter((a) => a.approved);
 
   return (
-    <div className="min-h-screen bg-ink flex flex-col p-4 pb-24">
+    <div className="min-h-screen bg-ink flex flex-col p-4 pb-8">
       <h1 className="text-white text-3xl font-black text-center py-6">נִיהוּל גַּלֶרְיָה</h1>
 
       {loading ? (

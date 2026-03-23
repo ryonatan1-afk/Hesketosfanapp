@@ -141,7 +141,7 @@ export default function QuizPlayer() {
   }
 
   return (
-    <div className="min-h-screen bg-yellow flex flex-col p-6 pb-28 relative overflow-hidden">
+    <div className="min-h-screen bg-yellow flex flex-col p-6 pb-8 relative overflow-hidden">
       <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
 
       {/* Progress bar */}

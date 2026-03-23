@@ -59,7 +59,7 @@ export default function GalleryPage() {
         <ArtworkUpload onUploadSuccess={fetchArtworks} />
       </div>
 
-      <div className="px-4 pb-24">
+      <div className="px-4 pb-8">
         {loading ? (
           <div className="flex justify-center py-12">
             <p className="text-white/70 font-bold text-lg">טוֹעֵן...</p>

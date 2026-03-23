@@ -77,7 +77,7 @@ function playSound(file: string) {
       </div>
 
 {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 px-4 pb-28">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 px-4 pb-8">
         {sounds.map((sound, i) => (
           <motion.button
             key={sound.file}

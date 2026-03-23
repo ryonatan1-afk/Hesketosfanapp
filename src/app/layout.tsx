@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Heebo } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import BottomNav from "@/components/BottomNav";
+import TopNav from "@/components/TopNav";
 
 const heebo = Heebo({
   variable: "--font-heebo",
@@ -51,8 +51,8 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-white text-ink antialiased font-sans">
-        <main className="flex-1 overflow-y-auto pb-24">{children}</main>
-        <BottomNav />
+        <TopNav />
+        <main className="flex-1 overflow-y-auto pt-14">{children}</main>
       </body>
     </html>
   );
