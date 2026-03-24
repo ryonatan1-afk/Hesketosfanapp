@@ -98,7 +98,7 @@ export default function SoundboardPage() {
             className={`${sound.bg} rounded-3xl shadow-xl aspect-square flex flex-col items-center justify-center gap-3 p-4 transition-opacity duration-300 ${cooldowns[sound.file] ? "opacity-40 cursor-not-allowed" : ""}`}
           >
             <Volume2 size={36} className="text-white drop-shadow" strokeWidth={2.5} />
-            <span className="text-white text-xl font-black text-center leading-tight drop-shadow">
+            <span className="text-white text-xl font-bold text-center leading-tight drop-shadow">
               {sound.label}
             </span>
           </motion.button>

@@ -51,7 +51,7 @@ export default function GalleryPage() {
       <div className="absolute bottom-0 inset-x-0 h-3 bg-yellow rounded-t-full" />
 
       <div className="flex flex-col items-center pt-8 pb-4 px-6 text-center">
-        <p className="text-white/80 text-sm font-bold tracking-widest">יְצִירוֹת יְלָדִים</p>
+        <p className="text-white/80 text-sm font-normal tracking-widest">יְצִירוֹת יְלָדִים</p>
         <h1 className="text-white text-5xl font-black leading-tight mt-1">הַגַּלֶרְיָה שֶׁלָּנוּ</h1>
       </div>
 
@@ -71,8 +71,8 @@ export default function GalleryPage() {
             className="flex flex-col items-center gap-3 py-12 text-center"
           >
             <span className="text-6xl">🎨</span>
-            <p className="text-white text-xl font-black">הַגַּלֶרְיָה מְחַכָּה לִיצִירוֹת שֶׁלָּכֶם!</p>
-            <p className="text-white/70 font-bold">הַעֲלוּ צִיּוּר וְיוֹפִיעַ כָּאן אַחֲרֵי אִישׁוּר</p>
+            <p className="text-white text-xl font-bold">הַגַּלֶרְיָה מְחַכָּה לִיצִירוֹת שֶׁלָּכֶם!</p>
+            <p className="text-white/70 font-normal">הַעֲלוּ צִיּוּר וְיוֹפִיעַ כָּאן אַחֲרֵי אִישׁוּר</p>
           </motion.div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
@@ -96,7 +96,7 @@ export default function GalleryPage() {
                     />
                   </div>
                   {artwork.created_by && (
-                    <p className="text-center text-xs font-bold text-ink/60 py-1.5 px-2 truncate">
+                    <p className="text-center text-xs font-normal text-ink/60 py-1.5 px-2 truncate">
                       מאת {artwork.created_by}
                     </p>
                   )}

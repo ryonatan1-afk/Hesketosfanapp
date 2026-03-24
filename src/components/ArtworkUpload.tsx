@@ -82,7 +82,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
 
   return (
     <div className="bg-white/20 rounded-3xl p-5 flex flex-col gap-4">
-      <h2 className="text-white text-2xl font-black text-center">הַעֲלָאַת צִיּוּר</h2>
+      <h2 className="text-white text-2xl font-bold text-center">הַעֲלָאַת צִיּוּר</h2>
 
       <button
         type="button"
@@ -152,7 +152,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
             className="flex items-center gap-3 bg-green-400/30 rounded-2xl p-4"
           >
             <CheckCircle size={28} className="text-white shrink-0" />
-            <p className="text-white font-bold text-lg leading-snug">
+            <p className="text-white font-normal text-lg leading-snug">
               הַצִּיּוּר נִשְׁלַח! הוּא יוֹפִיעַ בַּגַּלֶרְיָה אַחֲרֵי אִישׁוּר.
             </p>
           </motion.div>
@@ -168,7 +168,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
             className="flex items-center gap-3 bg-red-400/30 rounded-2xl p-4"
           >
             <XCircle size={28} className="text-white shrink-0" />
-            <p className="text-white font-bold text-lg">{errorMessage}</p>
+            <p className="text-white font-normal text-lg">{errorMessage}</p>
           </motion.div>
         )}
       </AnimatePresence>

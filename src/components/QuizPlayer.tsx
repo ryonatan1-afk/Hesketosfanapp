@@ -67,12 +67,12 @@ export default function QuizPlayer() {
               onClick={() => handleSelectQuiz(q.id)}
               className={`${CARD_COLORS[i % CARD_COLORS.length]} rounded-3xl px-6 py-5 text-right shadow-md`}
             >
-              <p className="text-white/70 text-sm font-bold">{q.episodeLabel}</p>
-              <p className="text-white text-xl font-black mt-1">{q.title}</p>
+              <p className="text-white/70 text-sm font-normal">{q.episodeLabel}</p>
+              <p className="text-white text-xl font-bold mt-1">{q.title}</p>
             </motion.button>
           ))}
         </div>
-        <p className="text-white/60 text-sm font-bold text-center mt-6">
+        <p className="text-white/60 text-sm font-normal text-center mt-6">
           עוֹד פְּרָקִים בַּדֶּרֶךְ ✨
         </p>
       </div>
@@ -134,14 +134,14 @@ export default function QuizPlayer() {
             <motion.button
               whileTap={{ scale: 0.92 }}
               onClick={handleRestart}
-              className="mt-4 bg-white text-yellow text-2xl font-black px-10 py-5 rounded-3xl shadow-lg"
+              className="mt-4 bg-white text-yellow text-2xl font-bold px-10 py-5 rounded-3xl shadow-lg"
             >
               שַׂחַק שׁוּב
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.92 }}
               onClick={handleBack}
-              className="mt-4 bg-ink text-white text-2xl font-black px-10 py-5 rounded-3xl shadow-lg"
+              className="mt-4 bg-ink text-white text-2xl font-bold px-10 py-5 rounded-3xl shadow-lg"
             >
               פְּרָקִים
             </motion.button>
@@ -168,12 +168,12 @@ export default function QuizPlayer() {
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={handleBack}
-          className="text-white/80 text-sm font-bold"
+          className="text-white/80 text-sm font-normal"
         >
           ← פְּרָקִים
         </button>
-        <span className="text-white/80 text-sm font-bold">{quiz.episodeLabel}</span>
-        <span className="text-white/80 text-sm font-bold">
+        <span className="text-white/80 text-sm font-normal">{quiz.episodeLabel}</span>
+        <span className="text-white/80 text-sm font-normal">
           {currentIndex + 1} / {total}
         </span>
       </div>
@@ -223,7 +223,7 @@ export default function QuizPlayer() {
                     ${bgClass}
                     ${isDimmed ? "opacity-40" : "opacity-100"}
                     w-full py-5 px-6 rounded-3xl
-                    text-white text-xl font-black text-right
+                    text-white text-xl font-bold text-right
                     shadow-md active:scale-95 transition-opacity
                   `}
                 >
@@ -242,7 +242,7 @@ export default function QuizPlayer() {
                 exit={{ y: 20, opacity: 0 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={handleNext}
-                className="mt-2 bg-ink text-white text-xl font-black py-5 rounded-3xl shadow-lg"
+                className="mt-2 bg-ink text-white text-xl font-bold py-5 rounded-3xl shadow-lg"
               >
                 {currentIndex + 1 >= total ? "סִיּוּם ✓" : "הַבָּא ←"}
               </motion.button>
