@@ -372,10 +372,12 @@ export default function DrawingCanvas() {
 
       const { data: urlData } = supabase.storage.from("artworks").getPublicUrl(filePath);
 
-      const { error: dbError } = await supabase
-        .from("artworks")
-        .insert({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null, approved: false });
-      if (dbError) throw dbError;
+      const res = await fetch("/api/gallery/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null }),
+      });
+      if (!res.ok) throw new Error("submit failed");
 
       trackEvent("draw_sent_to_gallery", { template: selectedTemplate });
       setGalleryStatus("success");

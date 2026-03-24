@@ -60,11 +60,13 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
       .from("artworks")
       .getPublicUrl(path);
 
-    const { error: dbError } = await supabase
-      .from("artworks")
-      .insert({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null, approved: false });
+    const dbRes = await fetch("/api/gallery/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null }),
+    });
 
-    if (dbError) {
+    if (!dbRes.ok) {
       trackEvent("gallery_upload_error", { stage: "database" });
       setStatus("error");
       setErrorMessage("שְׁגִיאָה בִּשְׁמִירַת הַצִּיּוּר. נַסּוּ שׁוּב.");
