@@ -12,6 +12,17 @@ const OPTION_COLORS = [
   "bg-ink",
 ] as const;
 
+const CARD_COLORS = [
+  "bg-pink-400",
+  "bg-blue",
+  "bg-green-400",
+  "bg-purple-400",
+  "bg-yellow",
+  "bg-coral",
+  "bg-sky-400",
+  "bg-lavender",
+];
+
 export default function QuizPlayer() {
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,15 +60,15 @@ export default function QuizPlayer() {
           בְּחַר פֶּרֶק
         </h1>
         <div className="flex flex-col gap-4">
-          {quizzes.map((q) => (
+          {quizzes.map((q, i) => (
             <motion.button
               key={q.id}
               whileTap={{ scale: 0.96 }}
               onClick={() => handleSelectQuiz(q.id)}
-              className="bg-white rounded-3xl px-6 py-5 text-right shadow-md"
+              className={`${CARD_COLORS[i % CARD_COLORS.length]} rounded-3xl px-6 py-5 text-right shadow-md`}
             >
-              <p className="text-blue text-sm font-bold opacity-70">{q.episodeLabel}</p>
-              <p className="text-ink text-xl font-black mt-1">{q.title}</p>
+              <p className="text-white/70 text-sm font-bold">{q.episodeLabel}</p>
+              <p className="text-white text-xl font-black mt-1">{q.title}</p>
             </motion.button>
           ))}
         </div>

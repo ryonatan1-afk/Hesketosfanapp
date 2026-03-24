@@ -57,7 +57,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white text-ink antialiased font-sans">
+      <body className="min-h-full flex flex-col bg-blue text-ink antialiased font-sans">
         <TopNav />
         <main className="flex-1 overflow-y-auto pt-14">{children}</main>
       </body>

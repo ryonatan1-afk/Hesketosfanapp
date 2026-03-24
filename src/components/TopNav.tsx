@@ -19,7 +19,7 @@ export default function TopNav() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -56, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 28 }}
-          className="fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-4"
+          className="fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-4 bg-white/10 backdrop-blur-md"
         >
           {/* Back — right side in RTL */}
           <button
