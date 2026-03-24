@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
 
   const { data, error } = await getAdminClient()
     .from("artworks")
-    .select("id, image_url, created_at, approved")
+    .select("id, image_url, created_at, approved, created_by")
     .order("approved", { ascending: true })
     .order("created_at", { ascending: false });
 

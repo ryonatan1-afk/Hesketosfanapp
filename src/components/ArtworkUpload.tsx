@@ -62,7 +62,7 @@ export default function ArtworkUpload({ onUploadSuccess }: ArtworkUploadProps) {
 
     const { error: dbError } = await supabase
       .from("artworks")
-      .insert({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null });
+      .insert({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null, approved: false });
 
     if (dbError) {
       trackEvent("gallery_upload_error", { stage: "database" });

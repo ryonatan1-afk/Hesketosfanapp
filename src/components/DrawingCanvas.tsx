@@ -374,7 +374,7 @@ export default function DrawingCanvas() {
 
       const { error: dbError } = await supabase
         .from("artworks")
-        .insert({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null });
+        .insert({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null, approved: false });
       if (dbError) throw dbError;
 
       trackEvent("draw_sent_to_gallery", { template: selectedTemplate });
