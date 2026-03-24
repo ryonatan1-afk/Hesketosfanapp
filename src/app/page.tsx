@@ -11,7 +11,7 @@ const tiles = [
   { emoji: "🔊", label: "לוּחַ צְלִילִים", href: "/soundboard", bg: "bg-pink-400"   },
   { emoji: "🧩", label: "חִידוֹן",         href: "/quiz",       bg: "bg-blue-400"   },
   { emoji: "🎨", label: "יְצִירָה",        href: "/draw",       bg: "bg-green-400"  },
-  { emoji: "🖼️", label: "גַּלֶרְיָה",      href: "/gallery",    bg: "bg-purple-400" },
+  { emoji: "🎙️", label: "פּוֹדְקַאסְט",    href: "/podcast",    bg: "bg-purple-400" },
 ];
 
 const DISCLAIMER =
@@ -58,7 +58,7 @@ export default function HomePage() {
       </div>
 
       <a
-        href={`https://wa.me/?text=${encodeURIComponent("🎙️ הסכתוס - אתר המעריצים!\nחִידוֹנִים, יְצִירָה, לוּחַ צְלִילִים וְגַלֶרְיָה לְכָל הַכִּיתָה ✨\nhttps://hesketosfanapp.vercel.app")}`}
+        href={`https://wa.me/?text=${encodeURIComponent("🎙️ הסכתוס - אתר המעריצים!\nחִידוֹנִים, יְצִירָה, פּוֹדְקַאסְט וְלוּחַ צְלִילִים לְכָל הַכִּיתָה ✨\nhttps://hesketosfanapp.vercel.app")}`}
         target="_blank"
         rel="noopener noreferrer"
         onClick={() => trackEvent("whatsapp_share_click")}

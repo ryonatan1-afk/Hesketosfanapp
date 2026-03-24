@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Undo2, Trash2, Upload, Share2, Paintbrush, PaintBucket, ZoomIn, ZoomOut } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { Undo2, Trash2, Share2, Paintbrush, PaintBucket, ZoomIn, ZoomOut } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
 type Tool = "brush" | "bucket";
@@ -151,9 +150,6 @@ export default function DrawingCanvas() {
   const [canUndo,       setCanUndo]       = useState(false);
   const [tool,          setTool]          = useState<Tool>("bucket");
   const [showSizePicker, setShowSizePicker] = useState(false);
-  const [galleryStatus, setGalleryStatus] = useState<"idle" | "uploading" | "success" | "error">("idle");
-  const [showNameModal, setShowNameModal] = useState(false);
-  const [createdBy, setCreatedBy] = useState("");
   const [canNativeShare, setCanNativeShare] = useState(false);
 
   // Detect native share support (files) on mount
@@ -203,8 +199,27 @@ export default function DrawingCanvas() {
     const img = new Image();
     img.src = `/coloringpages/${n}.svg`;
     img.onload = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const iw = img.naturalWidth  || img.width  || canvas.width;
+      const ih = img.naturalHeight || img.height || canvas.height;
+      const imgAspect    = iw / ih;
+      const canvasAspect = canvas.width / canvas.height;
+      let dw: number, dh: number, dx: number, dy: number;
+      if (imgAspect > canvasAspect) {
+        dw = canvas.width;
+        dh = canvas.width / imgAspect;
+        dx = 0;
+        dy = (canvas.height - dh) / 2;
+      } else {
+        dh = canvas.height;
+        dw = canvas.height * imgAspect;
+        dx = (canvas.width - dw) / 2;
+        dy = 0;
+      }
+      ctx.drawImage(img, dx, dy, dw, dh);
+
       undoStack.current = [];
       setCanUndo(false);
     };
@@ -353,41 +368,6 @@ export default function DrawingCanvas() {
     });
   }
 
-  function handleSendToGallery() {
-    if (galleryStatus === "uploading") return;
-    setShowNameModal(true);
-  }
-
-  async function submitToGallery() {
-    setShowNameModal(false);
-    setGalleryStatus("uploading");
-    try {
-      const blob = await getCanvasBlob();
-      const filePath = `${crypto.randomUUID()}.png`;
-
-      const { error: storageError } = await supabase.storage
-        .from("artworks")
-        .upload(filePath, blob, { contentType: "image/png", cacheControl: "3600", upsert: false });
-      if (storageError) throw storageError;
-
-      const { data: urlData } = supabase.storage.from("artworks").getPublicUrl(filePath);
-
-      const res = await fetch("/api/gallery/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image_url: urlData.publicUrl, created_by: createdBy.trim() || null }),
-      });
-      if (!res.ok) throw new Error("submit failed");
-
-      trackEvent("draw_sent_to_gallery", { template: selectedTemplate });
-      setGalleryStatus("success");
-      setCreatedBy("");
-    } catch {
-      setGalleryStatus("error");
-    } finally {
-      setTimeout(() => setGalleryStatus("idle"), 3000);
-    }
-  }
 
   async function handleShare() {
     trackEvent("draw_shared");
@@ -413,7 +393,7 @@ export default function DrawingCanvas() {
   const cursor = tool === "bucket" ? "cell" : "crosshair";
 
   return (
-    <div dir="ltr" className="relative flex flex-col h-[calc(100dvh-3.5rem)] bg-lavender select-none">
+    <div dir="ltr" className="relative flex flex-col h-[calc(100dvh-3.5rem)] bg-lavender select-none max-w-2xl mx-auto w-full">
 
       {/* Template picker */}
       <div className="flex gap-3 px-3 py-2 overflow-x-auto shrink-0 bg-lavender" dir="ltr">
@@ -579,25 +559,6 @@ export default function DrawingCanvas() {
           >
             <Trash2 size={18} />
           </button>
-          <button
-            onClick={handleSendToGallery}
-            disabled={galleryStatus === "uploading"}
-            aria-label="שְׁלַח לְגַלֶרְיָה"
-            className={`flex items-center gap-1.5 font-bold px-3 py-2 rounded-2xl shadow transition-all text-sm ${
-              galleryStatus === "success" ? "bg-green-500 text-white" :
-              galleryStatus === "error"   ? "bg-red-500 text-white" :
-              galleryStatus === "uploading" ? "bg-white/80 text-ink opacity-60" :
-              "bg-white/80 text-ink"
-            }`}
-          >
-            <Upload size={18} />
-            <span>
-              {galleryStatus === "uploading" ? "שׁוֹלֵחַ..." :
-               galleryStatus === "success"   ? "נִשְׁלַח!" :
-               galleryStatus === "error"     ? "שְׁגִיאָה" :
-               "גַּלֶרְיָה"}
-            </span>
-          </button>
           {canNativeShare && (
             <button
               onClick={handleShare}
@@ -611,35 +572,7 @@ export default function DrawingCanvas() {
         </div>
       </div>
 
-      {/* Name modal */}
-      {showNameModal && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/50 px-6">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-xs flex flex-col gap-4 shadow-2xl">
-            <h2 className="text-ink text-xl font-black text-center">מִי צִיֵּר אֶת זֶה?</h2>
-            <input
-              type="text"
-              value={createdBy}
-              onChange={(e) => setCreatedBy(e.target.value)}
-              placeholder="שֵׁם הַיּוֹצֵר (לֹא חוֹבָה)"
-              maxLength={40}
-              autoFocus
-              className="h-14 rounded-2xl px-4 text-lg font-bold text-right bg-gray-100 text-ink placeholder:text-ink/40 outline-none focus:ring-2 focus:ring-lavender"
-            />
-            <button
-              onClick={submitToGallery}
-              className="h-14 bg-ink text-white text-xl font-black rounded-2xl"
-            >
-              שְׁלַח לְגַלֶרְיָה
-            </button>
-            <button
-              onClick={() => { setShowNameModal(false); setCreatedBy(""); }}
-              className="text-ink/50 font-bold text-base"
-            >
-              בִּיטּוּל
-            </button>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }
