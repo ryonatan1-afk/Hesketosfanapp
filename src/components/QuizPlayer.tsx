@@ -136,7 +136,7 @@ export default function QuizPlayer() {
               onClick={handleRestart}
               className="mt-4 bg-white text-yellow text-2xl font-bold px-10 py-5 rounded-3xl shadow-lg"
             >
-              שַׂחַק שׁוּב
+              שַׂחֲקוּ שׁוּב
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.92 }}
