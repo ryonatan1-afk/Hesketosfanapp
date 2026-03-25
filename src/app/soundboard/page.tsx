@@ -20,6 +20,8 @@ const sounds: Sound[] = [
   { file: "noobemet.mp3",     label: "נו באמת!",        bg: "bg-lime-400",   emoji: "😱" },
   { file: "sawadikastav.mp3", label: "סוואדיקא סתיו",  bg: "bg-yellow-400", emoji: "🙏" },
   { file: "hashudi.mp3",      label: "חֲשׁוּדִי",          bg: "bg-purple-500", emoji: "🕵️" },
+  { file: "malhizi.mp3",     label: "מַלְחִיצִי",          bg: "bg-red-400",    emoji: "😰" },
+  { file: "nashnesh.mp3",    label: "לְנַשְׁנֵשׁ",          bg: "bg-amber-400",  emoji: "😋" },
 ];
 
 function fireConfetti() {

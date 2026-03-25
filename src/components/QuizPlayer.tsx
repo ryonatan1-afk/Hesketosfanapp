@@ -1,9 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { quizzes } from "@/data/quizzes";
 import { trackEvent } from "@/lib/analytics";
+
+function useQuizAudio(quizId: string | null) {
+  const [playing, setPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  function play(questionIndex: number) {
+    if (!quizId) return;
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    const audio = new Audio(`/quiz-audio/${quizId}/q${questionIndex}.mp3`);
+    audio.onplay = () => setPlaying(true);
+    audio.onended = () => setPlaying(false);
+    audio.onerror = () => setPlaying(false);
+    audioRef.current = audio;
+    audio.play().catch(() => setPlaying(false));
+  }
+
+  function stop() {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    setPlaying(false);
+  }
+
+  return { play, stop, playing };
+}
 
 const OPTION_COLORS = [
   "bg-blue",
@@ -29,6 +58,7 @@ export default function QuizPlayer() {
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  const { play, stop, playing } = useQuizAudio(selectedQuizId);
 
   const quiz = quizzes.find((q) => q.id === selectedQuizId) ?? null;
 
@@ -43,6 +73,7 @@ export default function QuizPlayer() {
   }
 
   function handleBack() {
+    stop();
     trackEvent("quiz_back_to_episodes", { episode_id: selectedQuizId });
     setSelectedQuizId(null);
     setCurrentIndex(0);
@@ -96,6 +127,7 @@ export default function QuizPlayer() {
   }
 
   function handleNext() {
+    stop();
     if (currentIndex + 1 >= total) {
       trackEvent("quiz_completed", { episode_id: selectedQuizId, score, total });
       setFinished(true);

@@ -28,6 +28,7 @@
         "imagetracerjs": "^1.2.6",
         "jpeg-js": "^0.4.4",
         "tailwindcss": "^4",
+        "tsx": "^4.21.0",
         "typescript": "^5"
     }
 }
