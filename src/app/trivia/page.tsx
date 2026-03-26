@@ -39,7 +39,7 @@ export default function TriviaLanding() {
       <div className="text-center">
         <div className="text-8xl mb-4">👑</div>
         <h1 className="text-5xl font-black text-white leading-tight">
-          מֶלֶךְ<br />הַטְּרִיוִויָה
+          מֶלֶךְ<br />הַטְּרִיוִויָה<br /><span className="text-3xl">שֶׁל הסכתוס</span>
         </h1>
         <p className="text-white/80 text-lg font-medium mt-2">תַּחֲרוּת טְרִיוִויָה עִם חֲבֵרִים!</p>
       </div>
