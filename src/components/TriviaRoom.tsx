@@ -182,7 +182,7 @@ export default function TriviaRoom({ code }: { code: string }) {
       } else {
         setCurrentQ((q) => q + 1);
       }
-    }, 1400);
+    }, 800);
   }
 
   function formatTime(secs: number) {
@@ -213,6 +213,7 @@ export default function TriviaRoom({ code }: { code: string }) {
         <div className="text-center">
           <div className="text-7xl mb-3">👑</div>
           <h1 className="text-5xl font-black text-white">מֶלֶךְ הַטְּרִיוִויָה</h1>
+          <p className="text-white/80 text-lg font-bold mt-2">חִידוֹן עַל הַפּוֹדְקַאסְט הסכתוס</p>
         </div>
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <input
@@ -414,6 +415,16 @@ export default function TriviaRoom({ code }: { code: string }) {
       >
         תַּחֲרוּת חֲדָשָׁה 🔄
       </button>
+
+      <div className="text-center flex flex-col items-center gap-3 mt-2">
+        <p className="text-white/70 text-base font-bold">רוֹצִים עוֹד כֵּיף עִם הסכתוס?</p>
+        <button
+          onClick={() => router.push("/")}
+          className="bg-white/20 text-white font-black text-lg px-8 py-4 rounded-2xl active:scale-95 transition-transform"
+        >
+          לְכָל הַפַּעִילוּיּוֹת 🎨🧩🔊
+        </button>
+      </div>
     </div>
   );
 }
