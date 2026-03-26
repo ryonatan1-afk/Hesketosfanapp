@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2 } from "lucide-react";
+import { Volume2, X } from "lucide-react";
 import confetti from "canvas-confetti";
 import { trackEvent } from "@/lib/analytics";
 
@@ -35,11 +35,16 @@ export default function SoundboardPage() {
   const [emojiKey, setEmojiKey] = useState(0);
   const [activeEmoji, setActiveEmoji] = useState<string | null>(null);
   const [cooldowns, setCooldowns] = useState<Record<string, boolean>>({});
+  const [showQuietModal, setShowQuietModal] = useState(false);
 
   const COOLDOWN_MS = 4000;
 
+  const hour = new Date().getHours();
+  const isQuietTime = hour >= 20 || hour < 8;
+
   function playSound(file: string) {
     if (cooldowns[file]) return;
+    if (isQuietTime) { setShowQuietModal(true); return; }
 
     const audio = new Audio(`/soundboard/${file}`);
     audiosRef.current.push(audio);
@@ -82,9 +87,50 @@ export default function SoundboardPage() {
         )}
       </AnimatePresence>
 
+      {/* Quiet time modal */}
+      <AnimatePresence>
+        {showQuietModal && (
+          <>
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowQuietModal(false)}
+              className="fixed inset-0 bg-black/50 z-40"
+            />
+            <motion.div
+              key="modal"
+              initial={{ opacity: 0, scale: 0.92, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 16 }}
+              transition={{ type: "spring", stiffness: 280, damping: 22 }}
+              className="fixed inset-x-4 top-1/2 -translate-y-1/2 bg-white rounded-3xl shadow-2xl p-6 z-50 max-w-sm mx-auto text-center"
+            >
+              <div className="text-6xl mb-3">🌙</div>
+              <h2 className="text-ink text-2xl font-black mb-2">ששש...לילה</h2>
+              <p className="text-ink/70 text-base leading-relaxed">
+                לוּחַ הַצְּלִילִים נָעוּל בֵּין 20:00 לְ־8:00.<br />
+                תָּבוֹאוּ לְהַשְׁמִיעַ צְלִילִים מָחָר בַּבֹּקֶר! 😴
+              </p>
+              <button
+                onClick={() => setShowQuietModal(false)}
+                className="mt-5 w-full bg-ink text-white font-black text-lg py-4 rounded-2xl flex items-center justify-center gap-2"
+              >
+                <X size={18} />
+                הֵבַנְתִּי
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="flex flex-col items-center pt-8 pb-2 px-6 text-center">
-<h1 className="text-white text-5xl font-black leading-tight mt-1">לוּחַ צְלִילִים</h1>
+        <h1 className="text-white text-5xl font-black leading-tight mt-1">לוּחַ צְלִילִים</h1>
+        {isQuietTime && (
+          <p className="text-white/70 text-base font-bold mt-2">🌙 ששש...לילה — הַצְּלִילִים נְעוּלִים</p>
+        )}
       </div>
 
 {/* Grid */}
@@ -97,7 +143,7 @@ export default function SoundboardPage() {
             transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 18 }}
             whileTap={cooldowns[sound.file] ? {} : { scale: 0.9 }}
             onClick={() => playSound(sound.file)}
-            className={`${sound.bg} rounded-3xl shadow-xl aspect-square flex flex-col items-center justify-center gap-3 p-4 transition-opacity duration-300 ${cooldowns[sound.file] ? "opacity-40 cursor-not-allowed" : ""}`}
+            className={`${sound.bg} rounded-3xl shadow-xl aspect-square flex flex-col items-center justify-center gap-3 p-4 transition-opacity duration-300 ${cooldowns[sound.file] ? "opacity-40 cursor-not-allowed" : isQuietTime ? "opacity-50" : ""}`}
           >
             <Volume2 size={36} className="text-white drop-shadow" strokeWidth={2.5} />
             <span className="text-white text-xl font-bold text-center leading-tight drop-shadow">
