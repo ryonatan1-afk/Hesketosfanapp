@@ -23,10 +23,7 @@ export async function GET(
 
   if (error || !room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
 
-  // Strip correctIndex from questions before sending to client
-  const questions = (room.questions as Array<Record<string, unknown>>).map(
-    ({ correctIndex: _ci, ...rest }) => rest
-  );
+  const questions = room.questions;
 
   return NextResponse.json({
     ...room,

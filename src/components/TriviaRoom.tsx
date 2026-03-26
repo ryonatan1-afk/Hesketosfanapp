@@ -13,6 +13,7 @@ const GAME_DURATION_SECS = 5 * 60;
 type ClientQuestion = {
   question: string;
   options: [string, string, string, string];
+  correctIndex: number;
 };
 
 type Participant = {
@@ -156,19 +157,21 @@ export default function TriviaRoom({ code }: { code: string }) {
   }
 
   async function handleAnswer(selectedIndex: number) {
-    if (pickedAnswer !== null || !myId) return;
-    setPickedAnswer(selectedIndex);
+    if (pickedAnswer !== null || !myId || !room) return;
 
-    const res = await fetch(`/api/trivia/${code}/answer`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ participantId: myId, questionIndex: currentQ, selectedIndex }),
-    });
-    const data = await res.json();
-    const correct = data.isCorrect as boolean;
+    // Validate instantly client-side for zero-delay feedback
+    const correct = room.questions[currentQ].correctIndex === selectedIndex;
+    setPickedAnswer(selectedIndex);
     setLastResult(correct);
     if (correct) setMyScore((s) => s + 1);
     trackEvent("trivia_answer", { code, question_index: currentQ, correct });
+
+    // Fire server request in background for scoring
+    fetch(`/api/trivia/${code}/answer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ participantId: myId, questionIndex: currentQ, selectedIndex }),
+    }).catch(() => {});
 
     setTimeout(() => {
       setPickedAnswer(null);
