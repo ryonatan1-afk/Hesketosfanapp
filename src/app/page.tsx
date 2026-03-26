@@ -14,6 +14,8 @@ const tiles = [
   { emoji: "🎙️", label: "פּוֹדְקַאסְט",    href: "/podcast",    bg: "bg-purple-400" },
 ];
 
+const trivaTile = { emoji: "👑", label: "מֶלֶךְ הַטְּרִיוִויָה", href: "/trivia", bg: "bg-orange-400" };
+
 const DISCLAIMER =
   "אתר זה הוא מיזם מעריצים עצמאי ואינו אתר רשמי של יוצרי הפודקאסט 'הסכתוס'. האתר הוקם ללא כוונת רווח, מתוך אהבה לתוכן וכדי להעניק ערך מוסף לקהילת המאזינים. כל זכויות היוצרים שייכות לבעליהם המקוריים. נוצר ע\"י אבא של תום ומיקה.";
 
@@ -36,25 +38,42 @@ export default function HomePage() {
 
       <h1 className="text-white text-4xl font-black text-center leading-snug">הסכתוס<br /><span className="text-2xl font-bold opacity-80">אֲתַר הַמַּעֲרִיצִים הַלֹּא רַשְׁמִי</span></h1>
 
-      <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-        {tiles.map((tile, i) => (
-          <motion.div
-            key={tile.href}
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 18 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Link
-              href={tile.href}
-              onClick={() => trackEvent("tile_click", { tile: tile.href.replace("/", "") })}
-              className={`${tile.bg} rounded-3xl shadow-xl flex flex-col items-center justify-center gap-3 aspect-square w-full`}
+      <div className="flex flex-col gap-4 w-full max-w-sm">
+        <div className="grid grid-cols-2 gap-4">
+          {tiles.map((tile, i) => (
+            <motion.div
+              key={tile.href}
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 18 }}
+              whileTap={{ scale: 0.9 }}
             >
-              <span className="text-6xl">{tile.emoji}</span>
-              <span className="text-white text-2xl font-bold">{tile.label}</span>
-            </Link>
-          </motion.div>
-        ))}
+              <Link
+                href={tile.href}
+                onClick={() => trackEvent("tile_click", { tile: tile.href.replace("/", "") })}
+                className={`${tile.bg} rounded-3xl shadow-xl flex flex-col items-center justify-center gap-3 aspect-square w-full`}
+              >
+                <span className="text-6xl">{tile.emoji}</span>
+                <span className="text-white text-2xl font-bold">{tile.label}</span>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.36, type: "spring", stiffness: 260, damping: 18 }}
+          whileTap={{ scale: 0.97 }}
+        >
+          <Link
+            href={trivaTile.href}
+            onClick={() => trackEvent("tile_click", { tile: "trivia" })}
+            className={`${trivaTile.bg} rounded-3xl shadow-xl flex flex-row items-center justify-center gap-4 w-full py-6`}
+          >
+            <span className="text-5xl">{trivaTile.emoji}</span>
+            <span className="text-white text-3xl font-bold">{trivaTile.label}</span>
+          </Link>
+        </motion.div>
       </div>
 
       <a
