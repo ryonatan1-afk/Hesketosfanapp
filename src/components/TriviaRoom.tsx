@@ -255,7 +255,7 @@ export default function TriviaRoom({ code }: { code: string }) {
           <div className="flex flex-col gap-2">
             {participants.map((p) => (
               <div key={p.id} className="bg-white/20 rounded-xl px-4 py-3 text-white font-bold text-lg text-center">
-                {p.id === myId ? `${p.name} (אַתָּה)` : p.name}
+                {p.id === myId ? `${p.name} (את\\ה)` : p.name}
               </div>
             ))}
           </div>
@@ -409,7 +409,7 @@ export default function TriviaRoom({ code }: { code: string }) {
             >
               <span className="text-2xl w-8 text-center">{medals[i] ?? `${i + 1}.`}</span>
               <span className={`font-black text-xl flex-1 text-right ${isMe ? "text-ink" : "text-white"}`}>
-                {p.name}{isMe ? " (אַתָּה)" : ""}
+                {p.name}{isMe ? " (את\\ה)" : ""}
               </span>
               <span className={`font-black text-xl ${isMe ? "text-ink" : "text-white"}`}>
                 {p.score} ⭐
