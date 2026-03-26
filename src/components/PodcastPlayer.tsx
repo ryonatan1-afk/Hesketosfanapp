@@ -2,7 +2,14 @@
 
 import { useRef, useState, useEffect } from "react";
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
-import type { Episode } from "@/app/podcast/page";
+type Episode = {
+  guid: string;
+  title: string;
+  audioUrl: string;
+  duration: number;
+  season?: number;
+  episode?: number;
+};
 
 function fmt(s: number): string {
   const m = Math.floor(s / 60);
