@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2, X } from "lucide-react";
+import { Volume2, X, Download } from "lucide-react";
 import confetti from "canvas-confetti";
 import { trackEvent } from "@/lib/analytics";
 
@@ -136,20 +136,30 @@ export default function SoundboardPage() {
 {/* Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 px-4 pb-8">
         {sounds.map((sound, i) => (
-          <motion.button
-            key={sound.file}
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 18 }}
-            whileTap={cooldowns[sound.file] ? {} : { scale: 0.9 }}
-            onClick={() => playSound(sound.file)}
-            className={`${sound.bg} rounded-3xl shadow-xl aspect-square flex flex-col items-center justify-center gap-3 p-4 transition-opacity duration-300 ${cooldowns[sound.file] ? "opacity-40 cursor-not-allowed" : isQuietTime ? "opacity-50" : ""}`}
-          >
-            <Volume2 size={36} className="text-white drop-shadow" strokeWidth={2.5} />
-            <span className="text-white text-xl font-bold text-center leading-tight drop-shadow">
-              {sound.label}
-            </span>
-          </motion.button>
+          <div key={sound.file} className="relative">
+            <motion.button
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 260, damping: 18 }}
+              whileTap={cooldowns[sound.file] ? {} : { scale: 0.9 }}
+              onClick={() => playSound(sound.file)}
+              className={`${sound.bg} rounded-3xl shadow-xl aspect-square w-full flex flex-col items-center justify-center gap-3 p-4 transition-opacity duration-300 ${cooldowns[sound.file] ? "opacity-40 cursor-not-allowed" : isQuietTime ? "opacity-50" : ""}`}
+            >
+              <Volume2 size={36} className="text-white drop-shadow" strokeWidth={2.5} />
+              <span className="text-white text-xl font-bold text-center leading-tight drop-shadow">
+                {sound.label}
+              </span>
+            </motion.button>
+            <a
+              href={`/soundboard/${sound.file}`}
+              download={sound.file}
+              onClick={(e) => e.stopPropagation()}
+              className="absolute bottom-2 left-2 bg-black/30 hover:bg-black/50 text-white rounded-full p-1.5 transition-colors"
+              title="הוֹרַד צְלִיל"
+            >
+              <Download size={14} strokeWidth={2.5} />
+            </a>
+          </div>
         ))}
       </div>
     </div>
