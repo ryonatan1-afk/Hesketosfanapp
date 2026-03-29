@@ -231,6 +231,27 @@ export default function SimonGame({ isQuietTime }: Props) {
         )}
       </AnimatePresence>
 
+      {/* Start button — shown above grid when idle */}
+      <AnimatePresence>
+        {phase === "idle" && (
+          <motion.div
+            key="start-top"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="flex justify-center mb-4"
+          >
+            <button
+              onClick={startGame}
+              className="bg-white text-ink font-black text-xl py-4 px-10 rounded-3xl shadow-xl flex items-center gap-3"
+            >
+              <Play size={22} fill="currentColor" />
+              הַתְחֵל
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* 2×2 Simon grid */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         {SIMON_SOUNDS.map((sound, idx) => {
@@ -262,26 +283,18 @@ export default function SimonGame({ isQuietTime }: Props) {
         })}
       </div>
 
-      {/* Start / Game over */}
+      {/* Leaderboard (idle) + Game over */}
       <AnimatePresence mode="wait">
 
-        {phase === "idle" && (
+        {phase === "idle" && leaderboard.length > 0 && (
           <motion.div
-            key="idle"
+            key="idle-lb"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             className="flex flex-col items-center gap-4"
           >
-            <button
-              onClick={startGame}
-              className="bg-white text-ink font-black text-xl py-4 px-10 rounded-3xl shadow-xl flex items-center gap-3"
-            >
-              <Play size={22} fill="currentColor" />
-              הַתְחֵל
-            </button>
-
-            {leaderboard.length > 0 && <Leaderboard entries={leaderboard} highlightId={null} />}
+            <Leaderboard entries={leaderboard} highlightId={null} />
           </motion.div>
         )}
 

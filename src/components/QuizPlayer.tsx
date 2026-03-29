@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { quizzes } from "@/data/quizzes";
+import { quizzes, type Question } from "@/data/quizzes";
 import { trackEvent } from "@/lib/analytics";
 
 function useQuizAudio(quizId: string | null) {
@@ -34,6 +34,19 @@ function useQuizAudio(quizId: string | null) {
   return { play, stop, playing };
 }
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickQuestions(q: (typeof quizzes)[0]): Question[] {
+  return q.pick ? shuffle(q.questions).slice(0, q.pick) : q.questions;
+}
+
 const OPTION_COLORS = [
   "bg-blue",
   "bg-coral",
@@ -54,6 +67,7 @@ const CARD_COLORS = [
 
 export default function QuizPlayer() {
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
+  const [activeQuestions, setActiveQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -65,6 +79,7 @@ export default function QuizPlayer() {
   function handleSelectQuiz(id: string) {
     const q = quizzes.find((q) => q.id === id);
     trackEvent("quiz_episode_selected", { episode_id: id, episode_label: q?.episodeLabel });
+    setActiveQuestions(q ? pickQuestions(q) : []);
     setSelectedQuizId(id);
     setCurrentIndex(0);
     setSelected(null);
@@ -91,17 +106,32 @@ export default function QuizPlayer() {
           בְּחַר פֶּרֶק
         </h1>
         <div className="flex flex-col gap-4">
-          {quizzes.map((q, i) => (
-            <motion.button
-              key={q.id}
-              whileTap={{ scale: 0.96 }}
-              onClick={() => handleSelectQuiz(q.id)}
-              className={`${CARD_COLORS[i % CARD_COLORS.length]} rounded-3xl px-6 py-5 text-right shadow-md`}
-            >
-              <p className="text-white/70 text-sm font-normal">{q.episodeLabel}</p>
-              <p className="text-white text-xl font-bold mt-1">{q.title}</p>
-            </motion.button>
-          ))}
+          {quizzes.map((q, i) => {
+            if (q.id === "audience") {
+              return (
+                <motion.button
+                  key={q.id}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={() => handleSelectQuiz(q.id)}
+                  className="bg-gradient-to-l from-pink-400 to-violet-500 rounded-3xl px-6 py-5 text-center shadow-md"
+                >
+                  <p className="text-3xl mb-1">💌</p>
+                  <p className="text-white text-xl font-bold">{q.title}</p>
+                </motion.button>
+              );
+            }
+            return (
+              <motion.button
+                key={q.id}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => handleSelectQuiz(q.id)}
+                className={`${CARD_COLORS[i % CARD_COLORS.length]} rounded-3xl px-6 py-5 text-right shadow-md`}
+              >
+                <p className="text-white/70 text-sm font-normal">{q.episodeLabel}</p>
+                <p className="text-white text-xl font-bold mt-1">{q.title}</p>
+              </motion.button>
+            );
+          })}
         </div>
         <p className="text-white/60 text-sm font-normal text-center mt-6">
           עוֹד פְּרָקִים בַּדֶּרֶךְ ✨
@@ -110,8 +140,9 @@ export default function QuizPlayer() {
     );
   }
 
-  const question = quiz.questions[currentIndex];
-  const total = quiz.questions.length;
+  const question = activeQuestions[currentIndex];
+  const total = activeQuestions.length;
+  if (!question) return null;
   const isAnswered = selected !== null;
 
   function handleSelect(index: number) {
@@ -139,6 +170,7 @@ export default function QuizPlayer() {
 
   function handleRestart() {
     trackEvent("quiz_restarted", { episode_id: selectedQuizId });
+    if (quiz) setActiveQuestions(pickQuestions(quiz));
     setCurrentIndex(0);
     setSelected(null);
     setScore(0);
