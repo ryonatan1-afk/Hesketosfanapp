@@ -160,6 +160,7 @@ export default function SimonGame({ isQuietTime }: Props) {
       const newRoundsCompleted = roundsCompleted + 1;
       setRoundsCompleted(newRoundsCompleted);
       setPhase("showing");
+      setPlayerIndex(0);
       const nextRandom = Math.floor(Math.random() * 4);
       const newSeq = [...sequence, nextRandom];
       setSequence(newSeq);
@@ -176,7 +177,7 @@ export default function SimonGame({ isQuietTime }: Props) {
   const currentRound = sequence.length;
 
   return (
-    <section className="w-full max-w-sm mx-auto px-4 pb-24 mt-2">
+    <section className="w-full max-w-sm mx-auto px-4 pb-20 mt-1">
 
       {/* Quiet-time banner */}
       <AnimatePresence>
@@ -185,7 +186,7 @@ export default function SimonGame({ isQuietTime }: Props) {
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="bg-white/20 rounded-2xl px-4 py-2.5 mb-3 flex items-center gap-2 text-white"
+            className="bg-white/20 rounded-2xl px-4 py-2 mb-2 flex items-center gap-2 text-white"
           >
             <span className="text-xl shrink-0">🌙</span>
             <p className="text-sm font-bold leading-snug">
@@ -196,7 +197,7 @@ export default function SimonGame({ isQuietTime }: Props) {
       </AnimatePresence>
 
       {/* Toggle row */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-2">
         <button
           onClick={() => !isQuietTime && setLightsOnly((v) => !v)}
           title={
@@ -253,7 +254,7 @@ export default function SimonGame({ isQuietTime }: Props) {
       </AnimatePresence>
 
       {/* 2×2 Simon grid */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-3">
         {SIMON_SOUNDS.map((sound, idx) => {
           const isActive = activeIndex === idx;
           const isWrong  = wrongIndex === idx;
@@ -271,7 +272,7 @@ export default function SimonGame({ isQuietTime }: Props) {
               }
               transition={isWrong ? { duration: 0.4 } : { duration: 0.12 }}
               disabled={phase !== "player"}
-              className={`${bgClass} rounded-3xl aspect-square w-full flex items-center justify-center
+              className={`${bgClass} rounded-3xl h-24 w-full flex items-center justify-center
                 text-white text-xl font-bold text-center leading-tight drop-shadow
                 ${isActive ? "shadow-2xl" : "shadow-md"}
                 transition-colors duration-100
@@ -304,9 +305,9 @@ export default function SimonGame({ isQuietTime }: Props) {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            className="bg-white/20 rounded-3xl p-5 text-white text-center"
+            className="bg-white/20 rounded-3xl p-4 text-white text-center"
           >
-            <div className="text-4xl mb-1">
+            <div className="text-3xl mb-1">
               {newEntryId ? "🎉" : "😵"}
             </div>
             <p className="font-black text-2xl mb-1">
@@ -368,7 +369,7 @@ export default function SimonGame({ isQuietTime }: Props) {
                 )}
                 <button
                   onClick={startGame}
-                  className="mt-4 bg-white text-ink font-black text-lg py-3 px-8 rounded-2xl inline-flex items-center gap-2"
+                  className="mt-2 bg-white text-ink font-black text-lg py-3 px-8 rounded-2xl inline-flex items-center gap-2"
                 >
                   <RotateCcw size={18} />
                   שׁוּב!
