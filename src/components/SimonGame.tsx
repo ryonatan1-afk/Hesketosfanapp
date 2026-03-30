@@ -288,20 +288,8 @@ export default function SimonGame({ isQuietTime }: Props) {
         })}
       </div>
 
-      {/* Leaderboard (idle) + Game over */}
+      {/* Game over */}
       <AnimatePresence mode="wait">
-
-        {phase === "idle" && leaderboard.length > 0 && (
-          <motion.div
-            key="idle-lb"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="flex flex-col items-center gap-4"
-          >
-            <Leaderboard entries={leaderboard} highlightId={null} />
-          </motion.div>
-        )}
 
         {phase === "gameover" && (
           <motion.div
@@ -368,9 +356,6 @@ export default function SimonGame({ isQuietTime }: Props) {
 
             {gameoverPhase === "done" && (
               <>
-                {newEntryId && leaderboard.length > 0 && (
-                  <Leaderboard entries={leaderboard} highlightId={newEntryId} />
-                )}
                 <button
                   onClick={startGame}
                   className="mt-2 bg-white text-ink font-black text-lg py-3 px-8 rounded-2xl inline-flex items-center gap-2"
@@ -384,6 +369,13 @@ export default function SimonGame({ isQuietTime }: Props) {
         )}
 
       </AnimatePresence>
+
+      {leaderboard.length > 0 && (
+        <Leaderboard
+          entries={leaderboard}
+          highlightId={gameoverPhase === "done" ? newEntryId : null}
+        />
+      )}
     </section>
   );
 }
