@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Play, RotateCcw, Volume2, VolumeX, Loader2 } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 interface SimonSound {
   file: string;
@@ -78,6 +79,7 @@ export default function SimonGame({ isQuietTime }: Props) {
 
   async function submitScore() {
     if (!nameInput.trim()) return;
+    trackEvent("simon_score_submitted", { score: finalScore, name: nameInput.trim() });
     setGameoverPhase("submitting");
     try {
       const { id } = await fetch("/api/simon/scores", {
@@ -117,6 +119,7 @@ export default function SimonGame({ isQuietTime }: Props) {
   );
 
   function startGame() {
+    trackEvent("simon_game_started");
     const id = ++gameIdRef.current;
     const firstIdx = Math.floor(Math.random() * 4);
     const newSeq = [firstIdx];
@@ -145,6 +148,7 @@ export default function SimonGame({ isQuietTime }: Props) {
       setWrongIndex(idx);
       const score = roundsCompleted;
       setFinalScore(score);
+      trackEvent("simon_game_over", { score });
       const id = ++gameIdRef.current;
       setTimeout(() => {
         if (gameIdRef.current !== id) return;
