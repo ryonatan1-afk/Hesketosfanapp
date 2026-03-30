@@ -10,10 +10,34 @@ const heebo = Heebo({
   weight: ["400", "700", "900"],
 });
 
+const BASE_URL = "https://hesketosfanapp.vercel.app";
+
 export const metadata: Metadata = {
-  title: "הסכתוס",
-  description: "פודקאסט לילדים",
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: "הסכתוס — אתר המעריצים",
+    template: "%s | הסכתוס",
+  },
+  description:
+    "אתר המעריצים הלא רשמי של הסכתוס — פודקאסט לילדים. חידונים, לוח צלילים, יצירה וגלריה לכל הכיתה!",
+  keywords: ["הסכתוס", "פודקאסט ילדים", "חידון", "לוח צלילים", "להיטוס", "ילדים"],
   manifest: "/manifest.json",
+  openGraph: {
+    type: "website",
+    locale: "he_IL",
+    url: BASE_URL,
+    siteName: "הסכתוס",
+    title: "הסכתוס — אתר המעריצים",
+    description:
+      "חידונים, לוח צלילים, יצירה וגלריה — כל הכיף של הסכתוס במקום אחד!",
+    images: [{ url: "/icons/icon.jpg", width: 512, height: 512, alt: "הסכתוס" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "הסכתוס — אתר המעריצים",
+    description: "חידונים, לוח צלילים, יצירה וגלריה לכל הכיתה!",
+    images: ["/icons/icon.jpg"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

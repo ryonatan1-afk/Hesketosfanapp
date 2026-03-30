@@ -1,3 +1,11 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "פּוֹדְקַאסְט",
+  description: "הַאֲזִינוּ לְהסכתוס — פּוֹדְקַאסְט לְיַלְדִים בְּסְפּוֹטִיפַיי וּבְכָל אַפְּלִיקַצְיַת הָאֲזָנָה!",
+  openGraph: { title: "פּוֹדְקַאסְט | הסכתוס", description: "הַאֲזִינוּ לְהסכתוס — פּוֹדְקַאסְט לְיַלְדִים בְּסְפּוֹטִיפַיי!" },
+};
+
 const ARTWORK =
   "https://www.omnycontent.com/d/playlist/397b9456-4f75-4509-acff-ac0600b4a6a4/05f48c55-97c4-4049-8449-b14f00850082/e6bdb1ae-5412-42a1-a677-b14f008bbfc9/image.jpg?size=Large";
 
