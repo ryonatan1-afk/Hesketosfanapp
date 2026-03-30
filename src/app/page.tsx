@@ -24,7 +24,7 @@ export default function HomePage() {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
 
   return (
-    <div className="min-h-screen bg-blue flex flex-col items-center justify-center gap-6 p-6 pb-24 relative overflow-hidden">
+    <div className="min-h-screen bg-blue flex flex-col items-center justify-center gap-6 p-6 pb-24 relative overflow-x-hidden">
       <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
       <InstallBanner />
 
