@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Info, X } from "lucide-react";
 import InstallBanner from "@/components/InstallBanner";
 import { trackEvent } from "@/lib/analytics";
+import { getCoins, COINS_EVENT } from "@/lib/coins";
 
 const tiles = [
   { emoji: "🔊", label: "לוּחַ צְלִילִים", href: "/soundboard", bg: "bg-pink-400"   },
@@ -22,6 +23,14 @@ const DISCLAIMER =
 
 export default function HomePage() {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [coins, setCoins] = useState(0);
+
+  useEffect(() => {
+    setCoins(getCoins());
+    function onCoins(e: Event) { setCoins((e as CustomEvent<number>).detail); }
+    window.addEventListener(COINS_EVENT, onCoins);
+    return () => window.removeEventListener(COINS_EVENT, onCoins);
+  }, []);
 
   return (
     <div className="min-h-screen bg-blue flex flex-col items-center justify-center gap-6 p-6 pb-24 relative overflow-x-hidden">
@@ -38,6 +47,9 @@ export default function HomePage() {
       </button>
 
       <h1 className="text-white text-4xl font-black text-center leading-snug">הסכתוס<br /><span className="text-2xl font-bold opacity-80">אֲתַר הַמַּעֲרִיצִים הַלֹּא רַשְׁמִי</span></h1>
+      {coins > 0 && (
+        <p className="text-white/70 text-lg font-bold -mt-3">🪙 {coins} מַטְבְּעוֹת</p>
+      )}
 
       <div className="flex flex-col gap-4 w-full max-w-sm">
         <div className="grid grid-cols-2 gap-4">

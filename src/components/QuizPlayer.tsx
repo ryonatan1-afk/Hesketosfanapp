@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { quizzes, type Question } from "@/data/quizzes";
 import { trackEvent } from "@/lib/analytics";
+import { addCoins } from "@/lib/coins";
 
 function useQuizAudio(quizId: string | null) {
   const [playing, setPlaying] = useState(false);
@@ -72,6 +73,9 @@ export default function QuizPlayer() {
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [coinsEarned, setCoinsEarned] = useState(0);
+  const [isPerfect, setIsPerfect] = useState(false);
+  const [showCoinPop, setShowCoinPop] = useState(false);
   const { play, stop, playing } = useQuizAudio(selectedQuizId);
 
   const quiz = quizzes.find((q) => q.id === selectedQuizId) ?? null;
@@ -85,6 +89,8 @@ export default function QuizPlayer() {
     setSelected(null);
     setScore(0);
     setFinished(false);
+    setCoinsEarned(0);
+    setIsPerfect(false);
   }
 
   function handleBack() {
@@ -95,6 +101,8 @@ export default function QuizPlayer() {
     setSelected(null);
     setScore(0);
     setFinished(false);
+    setCoinsEarned(0);
+    setIsPerfect(false);
   }
 
   // Episode selector screen
@@ -154,13 +162,26 @@ export default function QuizPlayer() {
       is_correct: isCorrect,
     });
     setSelected(index);
-    if (isCorrect) setScore((s) => s + 1);
+    if (isCorrect) {
+      setScore((s) => s + 1);
+      addCoins(1);
+      setCoinsEarned((c) => c + 1);
+      setShowCoinPop(true);
+      setTimeout(() => setShowCoinPop(false), 700);
+    }
   }
 
   function handleNext() {
     stop();
     if (currentIndex + 1 >= total) {
+      const perfect = score === total;
+      if (perfect) {
+        addCoins(3);
+        setCoinsEarned((c) => c + 3);
+        setIsPerfect(true);
+      }
       trackEvent("quiz_completed", { episode_id: selectedQuizId, score, total });
+      trackEvent("quiz_coins_earned", { episode_id: selectedQuizId, coins_earned: coinsEarned + (perfect ? 3 : 0), is_perfect: perfect });
       setFinished(true);
     } else {
       setCurrentIndex((i) => i + 1);
@@ -175,6 +196,8 @@ export default function QuizPlayer() {
     setSelected(null);
     setScore(0);
     setFinished(false);
+    setCoinsEarned(0);
+    setIsPerfect(false);
   }
 
   if (finished) {
@@ -194,6 +217,19 @@ export default function QuizPlayer() {
           <p className="text-white text-2xl font-bold">
             עָנִיתָ נָכוֹן עַל {score} מִתּוֹךְ {total} שְׁאֵלוֹת
           </p>
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.2 }}
+            className="flex flex-col items-center gap-1"
+          >
+            <p className="text-white text-3xl font-black">
+              🪙 +{coinsEarned} מַטְבְּעוֹת!
+            </p>
+            {isPerfect && (
+              <p className="text-white/80 text-lg font-bold">בּוֹנוּס שְׁלֵמוּת! +3 ✨</p>
+            )}
+          </motion.div>
           <div className="flex gap-4 flex-wrap justify-center">
             <motion.button
               whileTap={{ scale: 0.92 }}
@@ -255,6 +291,24 @@ export default function QuizPlayer() {
           <h2 className="text-white text-3xl font-black leading-snug text-center mb-2">
             {question.question}
           </h2>
+
+          {/* Floating coin pop */}
+          <div className="relative h-0">
+            <AnimatePresence>
+              {showCoinPop && (
+                <motion.p
+                  key="coinpop"
+                  initial={{ y: 0, opacity: 1, scale: 1 }}
+                  animate={{ y: -48, opacity: 0, scale: 1.3 }}
+                  exit={{}}
+                  transition={{ duration: 0.7 }}
+                  className="absolute inset-x-0 text-center text-white text-2xl font-black pointer-events-none"
+                >
+                  +1 🪙
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Answer buttons */}
           <div className="flex flex-col gap-4">

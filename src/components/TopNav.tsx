@@ -5,11 +5,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { Home, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
+import { useState, useEffect } from "react";
+import { getCoins, COINS_EVENT } from "@/lib/coins";
 
 export default function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
   const isHome = pathname === "/";
+  const [coins, setCoins] = useState(0);
+
+  useEffect(() => {
+    setCoins(getCoins());
+    function onCoins(e: Event) {
+      setCoins((e as CustomEvent<number>).detail);
+    }
+    window.addEventListener(COINS_EVENT, onCoins);
+    return () => window.removeEventListener(COINS_EVENT, onCoins);
+  }, [pathname]);
 
   return (
     <AnimatePresence>
@@ -36,6 +48,13 @@ export default function TopNav() {
           >
             <ChevronRight size={24} strokeWidth={2.5} />
           </button>
+
+          {/* Coin balance — center */}
+          {coins > 0 && (
+            <span className="px-3 py-1 rounded-2xl bg-black/20 text-white text-sm font-bold backdrop-blur-sm">
+              🪙 {coins}
+            </span>
+          )}
 
           {/* Home — left side in RTL */}
           <Link
