@@ -23,6 +23,9 @@ For **Large** tasks: describe the approach and ask for confirmation before writi
 - **Always add nikud (נִיקּוּד)** to all Hebrew text — vowel diacritics help young kids read and pronounce words
   - Skip nikud on: brand names ("הסכתוס", "להיטוס"), show-specific catchphrases, filenames, and metadata/SEO strings
 
+## Development Conventions
+- **Analytics**: Always add analytics events when building or modifying any feature. Follow the existing `trackEvent` / analytics pattern already used in the codebase.
+
 ## Backlog
 See [BACKLOG.md](BACKLOG.md) for the prioritized list of upcoming features and ideas. Check it at the start of relevant sessions.
 
