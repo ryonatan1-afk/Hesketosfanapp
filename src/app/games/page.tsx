@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 
 const games = [
   { emoji: "🎮", label: "חַזְרוּ אַחֲרַי!", description: "מִשְׂחַק זִכָּרוֹן — חִזְרוּ עַל הַסֵּדֶר!", href: "/games/simon", bg: "bg-pink-400" },
+  { emoji: "🧙‍♀️", label: "הַמְּכַשֵּׁפָה הַרָּצָה", description: "אֱסֹף קִישׁוּאִים — הִמָּנַע מִפֶּטְרוֹזִילְיוֹן!", href: "/games/witch-runner", bg: "bg-purple-500" },
 ];
 
 export default function GamesPage() {
