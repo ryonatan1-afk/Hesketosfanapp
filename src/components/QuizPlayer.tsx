@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { quizzes, type Question } from "@/data/quizzes";
 import { trackEvent } from "@/lib/analytics";
@@ -52,7 +52,7 @@ const OPTION_COLORS = [
   "bg-blue",
   "bg-coral",
   "bg-lavender",
-  "bg-ink",
+  "bg-teal-400",
 ] as const;
 
 const CARD_COLORS = [
@@ -79,6 +79,9 @@ export default function QuizPlayer() {
   const { play, stop, playing } = useQuizAudio(selectedQuizId);
 
   const quiz = quizzes.find((q) => q.id === selectedQuizId) ?? null;
+
+  const advancedRef = useRef(false);
+  useEffect(() => { advancedRef.current = false; }, [currentIndex, selected]);
 
   function handleSelectQuiz(id: string) {
     const q = quizzes.find((q) => q.id === id);
@@ -152,6 +155,12 @@ export default function QuizPlayer() {
   const total = activeQuestions.length;
   if (!question) return null;
   const isAnswered = selected !== null;
+
+  function handleNextSafe() {
+    if (advancedRef.current) return;
+    advancedRef.current = true;
+    handleNext();
+  }
 
   function handleSelect(index: number) {
     if (isAnswered) return;
@@ -359,10 +368,20 @@ export default function QuizPlayer() {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 20, opacity: 0 }}
                 whileTap={{ scale: 0.94 }}
-                onClick={handleNext}
-                className="mt-2 bg-ink text-white text-xl font-bold py-5 rounded-3xl shadow-lg"
+                onClick={handleNextSafe}
+                className="relative overflow-hidden mt-2 bg-ink text-white text-xl font-bold py-5 rounded-3xl shadow-lg"
               >
-                {currentIndex + 1 >= total ? "סִיּוּם ✓" : "הַבָּא ←"}
+                <motion.span
+                  key={`timer-${currentIndex}`}
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 5, ease: "linear" }}
+                  onAnimationComplete={handleNextSafe}
+                  className="absolute inset-y-0 right-0 bg-white/20 pointer-events-none"
+                />
+                <span className="relative z-10">
+                  {currentIndex + 1 >= total ? "סִיּוּם ✓" : "הַבָּא ←"}
+                </span>
               </motion.button>
             )}
           </AnimatePresence>
