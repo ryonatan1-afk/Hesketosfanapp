@@ -54,7 +54,7 @@ export default function RootLayout({
     <html lang="he" dir="rtl" className={`${heebo.variable} h-full`}>
       <head>
         <meta name="theme-color" content="#68B8ED" />
-        <link rel="apple-touch-icon" href="/icons/icon.jpg" />
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         <Script
           id="register-sw"
           strategy="afterInteractive"
