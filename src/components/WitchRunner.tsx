@@ -524,7 +524,6 @@ export default function WitchRunner() {
               g.score++;
               if (mountRef.current) {
                 setUiScore(g.score);
-                trackEvent("witch_runner_zucchini", { score: g.score });
               }
             }
           }
