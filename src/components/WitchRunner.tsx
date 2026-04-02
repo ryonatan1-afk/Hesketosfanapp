@@ -387,14 +387,17 @@ export default function WitchRunner() {
     const hs = isNaN(stored) ? 0 : stored;
     gs.current.highScore = hs;
     setUiHigh(hs);
-    fetch("/api/witch-runner/scores")
-      .then((r) => r.json())
-      .then((data) => Array.isArray(data) && setLeaderboard(data))
-      .catch(() => {});
+    if (navigator.onLine) {
+      fetch("/api/witch-runner/scores")
+        .then((r) => r.json())
+        .then((data) => Array.isArray(data) && setLeaderboard(data))
+        .catch(() => {});
+    }
     return () => { mountRef.current = false; };
   }, []);
 
   async function fetchAndCheckScore(score: number) {
+    if (!navigator.onLine) { setGameoverPhase("done"); return; }
     setGameoverPhase("checking");
     try {
       const data: ScoreEntry[] = await fetch("/api/witch-runner/scores").then((r) => r.json());
