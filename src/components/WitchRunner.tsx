@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+
+interface ScoreEntry { id: string; name: string; score: number; }
+type GameoverPhase = "checking" | "name-input" | "submitting" | "done";
 
 // ─── Canvas constants ─────────────────────────────────────────────────────────
 const W = 400;
@@ -11,8 +15,8 @@ const GROUND_Y = 460;   // Y-coordinate of the ground line (witch's feet rest he
 const WITCH_CX = 83;    // horizontal center of witch (WITCH_X=65, +18)
 const GRAVITY = 0.58;
 const JUMP_VY = -14;
-const BASE_SPEED = 4;
-const MAX_SPEED = 13;
+const BASE_SPEED = 3.5;
+const MAX_SPEED = 9;
 
 type Phase = "idle" | "playing" | "dead";
 
@@ -266,11 +270,13 @@ function drawParsley(ctx: CanvasRenderingContext2D, x: number) {
 }
 
 // ─── Drawing: zucchini collectible ────────────────────────────────────────────
-// Visual box: ~44w × 24h, sitting on ground at (x, GROUND_Y)
+// Floats in the air — witch must jump to collect it.
+const ZUCCHINI_Y = GROUND_Y - 80; // center Y; witch needs to jump to reach this
 
-function drawZucchini(ctx: CanvasRenderingContext2D, x: number) {
+function drawZucchini(ctx: CanvasRenderingContext2D, x: number, frame: number) {
+  const floatY = ZUCCHINI_Y + Math.sin(frame * 0.07) * 5; // gentle bob
   ctx.save();
-  ctx.translate(x + 22, GROUND_Y - 14);
+  ctx.translate(x + 22, floatY);
   ctx.rotate(-0.18);
 
   // Body
@@ -297,7 +303,7 @@ function drawZucchini(ctx: CanvasRenderingContext2D, x: number) {
 
   // Stem + small leaf (un-rotated coords)
   ctx.save();
-  ctx.translate(x + 22, GROUND_Y - 14);
+  ctx.translate(x + 22, floatY);
   ctx.strokeStyle = "#33691E";
   ctx.lineWidth = 2.5;
   ctx.lineCap = "round";
@@ -366,19 +372,58 @@ export default function WitchRunner() {
   const mountRef = useRef(true);
 
   // React state — only for rendering the overlay UI
-  const [uiPhase, setUiPhase]   = useState<Phase>("idle");
-  const [uiScore, setUiScore]   = useState(0);
-  const [uiHigh,  setUiHigh]    = useState(0);
-  const [isNewHigh, setIsNewHigh] = useState(false);
+  const [uiPhase, setUiPhase]       = useState<Phase>("idle");
+  const [uiScore, setUiScore]       = useState(0);
+  const [uiHigh,  setUiHigh]        = useState(0);
+  const [isNewHigh, setIsNewHigh]   = useState(false);
+  const [gameoverPhase, setGameoverPhase] = useState<GameoverPhase>("checking");
+  const [leaderboard, setLeaderboard]     = useState<ScoreEntry[]>([]);
+  const [nameInput, setNameInput]         = useState("");
+  const [newEntryId, setNewEntryId]       = useState<string | null>(null);
 
-  // Load high score from localStorage on mount
+  // Load high score from localStorage + leaderboard on mount
   useEffect(() => {
     const stored = parseInt(localStorage.getItem("witch-runner-hs") ?? "0", 10);
     const hs = isNaN(stored) ? 0 : stored;
     gs.current.highScore = hs;
     setUiHigh(hs);
+    fetch("/api/witch-runner/scores")
+      .then((r) => r.json())
+      .then((data) => Array.isArray(data) && setLeaderboard(data))
+      .catch(() => {});
     return () => { mountRef.current = false; };
   }, []);
+
+  async function fetchAndCheckScore(score: number) {
+    setGameoverPhase("checking");
+    try {
+      const data: ScoreEntry[] = await fetch("/api/witch-runner/scores").then((r) => r.json());
+      setLeaderboard(Array.isArray(data) ? data : []);
+      const qualifies = score > 0 && (data.length < 10 || score > data[data.length - 1].score);
+      setGameoverPhase(qualifies ? "name-input" : "done");
+    } catch {
+      setGameoverPhase("done");
+    }
+  }
+
+  async function submitScore() {
+    if (!nameInput.trim()) return;
+    trackEvent("witch_runner_score_submitted", { score: uiScore, name: nameInput.trim() });
+    setGameoverPhase("submitting");
+    try {
+      const { id } = await fetch("/api/witch-runner/scores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: nameInput.trim(), score: uiScore }),
+      }).then((r) => r.json());
+      const updated: ScoreEntry[] = await fetch("/api/witch-runner/scores").then((r) => r.json());
+      setLeaderboard(Array.isArray(updated) ? updated : []);
+      setNewEntryId(id ?? null);
+    } catch {
+      // fail silently
+    }
+    setGameoverPhase("done");
+  }
 
   // ── Start / restart logic (called from event handlers only) ──────────────
   const startGame = useCallback(() => {
@@ -398,6 +443,9 @@ export default function WitchRunner() {
       setUiPhase("playing");
       setUiScore(0);
       setIsNewHigh(false);
+      setNameInput("");
+      setNewEntryId(null);
+      setGameoverPhase("checking");
     }
   }, []);
 
@@ -428,7 +476,7 @@ export default function WitchRunner() {
 
         g.frame++;
         g.distance  += g.speed;
-        g.speed      = Math.min(BASE_SPEED + g.distance * 0.0016, MAX_SPEED);
+        g.speed      = Math.min(BASE_SPEED + g.distance * 0.0005, MAX_SPEED);
         g.groundOff  = (g.groundOff + g.speed) % 32;
         g.cloudOff  += g.speed;
 
@@ -458,6 +506,7 @@ export default function WitchRunner() {
                 setUiScore(g.score);
                 setIsNewHigh(newHigh);
                 if (newHigh) setUiHigh(g.score);
+                fetchAndCheckScore(g.score);
               }
               trackEvent("witch_runner_game_over", {
                 score: g.score,
@@ -467,7 +516,7 @@ export default function WitchRunner() {
             }
           } else {
             // Zucchini hitbox: x+2 → x+43, GROUND_Y-25 → GROUND_Y-3
-            if (wR > obj.x + 2 && wL < obj.x + 43 && wB > GROUND_Y - 25 && wT < GROUND_Y - 3) {
+            if (wR > obj.x + 2 && wL < obj.x + 43 && wB > ZUCCHINI_Y - 16 && wT < ZUCCHINI_Y + 16) {
               obj.collected = true;
               g.score++;
               if (mountRef.current) {
@@ -501,7 +550,7 @@ export default function WitchRunner() {
         if (obj.type === "parsley") {
           drawParsley(ctx, obj.x);
         } else if (!obj.collected) {
-          drawZucchini(ctx, obj.x);
+          drawZucchini(ctx, obj.x, g.frame);
         }
       }
 
@@ -572,10 +621,9 @@ export default function WitchRunner() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ type: "spring", stiffness: 240, damping: 18 }}
-              className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/52 rounded-3xl"
+              className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/60 rounded-3xl px-5 overflow-y-auto"
             >
               <p className="text-white text-5xl font-black">אוּיּ! 💫</p>
-              <p className="text-white/70 text-base font-bold">פֶּטְרוֹזִילְיוֹן בְּאָרְחָה!</p>
 
               <motion.p
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -590,32 +638,105 @@ export default function WitchRunner() {
                 <motion.p
                   initial={{ y: 8, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
+                  transition={{ delay: 0.25 }}
                   className="text-yellow-300 text-xl font-black"
                 >
                   🏆 שִׁיא חָדָשׁ!
                 </motion.p>
               )}
-              {!isNewHigh && uiHigh > 0 && (
-                <p className="text-white/60 text-sm font-bold">שִׁיא: {uiHigh} 🥒</p>
+
+              {/* Leaderboard flow */}
+              {gameoverPhase === "checking" && (
+                <Loader2 size={24} className="animate-spin text-white/60" />
               )}
 
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={startGame}
-                className="mt-2 bg-purple-500 active:bg-purple-400 text-white font-black text-xl px-10 py-4 rounded-2xl shadow-xl"
-              >
-                שׁוּב פַּעַם! 🧙‍♀️
-              </motion.button>
+              {gameoverPhase === "name-input" && (
+                <div className="flex flex-col gap-2 w-full">
+                  <p className="text-yellow-200 text-sm font-bold text-center">🏆 נִכְנַסְתָּ לְטוֹפ 10!</p>
+                  <input
+                    type="text"
+                    value={nameInput}
+                    onChange={(e) => setNameInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && submitScore()}
+                    placeholder="הַכְנֵס שֵׁם..."
+                    maxLength={20}
+                    className="w-full bg-white/20 text-white placeholder-white/40 font-bold text-center
+                      rounded-2xl px-4 py-3 text-base outline-none focus:bg-white/30 transition-colors"
+                    autoFocus
+                  />
+                  <button
+                    onClick={submitScore}
+                    disabled={!nameInput.trim()}
+                    className="bg-white text-purple-700 font-black text-base py-3 px-6 rounded-2xl disabled:opacity-40 transition-opacity"
+                  >
+                    שְׁמוֹר תּוֹצָאָה
+                  </button>
+                  <button
+                    onClick={() => setGameoverPhase("done")}
+                    className="text-white/50 text-sm underline underline-offset-2"
+                  >
+                    דַּלֵּג
+                  </button>
+                </div>
+              )}
+
+              {gameoverPhase === "submitting" && (
+                <Loader2 size={24} className="animate-spin text-white/60" />
+              )}
+
+              {gameoverPhase === "done" && (
+                <>
+                  {leaderboard.length > 0 && (
+                    <WitchLeaderboard entries={leaderboard} highlightId={newEntryId} />
+                  )}
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={startGame}
+                    className="mt-1 bg-purple-500 active:bg-purple-400 text-white font-black text-xl px-10 py-4 rounded-2xl shadow-xl"
+                  >
+                    שׁוּב פַּעַם! 🧙‍♀️
+                  </motion.button>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* High score below canvas when not in game-over */}
-      {uiPhase !== "dead" && uiHigh > 0 && (
-        <p className="text-white/70 text-sm font-bold">שִׁיא: {uiHigh} 🥒</p>
+      {/* Leaderboard below canvas when idle/playing */}
+      {uiPhase !== "dead" && leaderboard.length > 0 && (
+        <div className="w-full max-w-[400px]">
+          <WitchLeaderboard entries={leaderboard} highlightId={null} />
+        </div>
       )}
+    </div>
+  );
+}
+
+const MEDALS = ["🥇", "🥈", "🥉"];
+
+function WitchLeaderboard({ entries, highlightId }: { entries: ScoreEntry[]; highlightId: string | null }) {
+  return (
+    <div className="w-full">
+      <p className="text-white/70 text-xs font-bold mb-1.5 text-center">טוֹפ 10</p>
+      <div className="space-y-1">
+        {entries.map((entry, i) => (
+          <div
+            key={entry.id}
+            className={`flex items-center justify-between px-3 py-1.5 rounded-xl text-sm font-bold transition-colors ${
+              entry.id === highlightId
+                ? "bg-yellow-300/40 text-white"
+                : "bg-white/10 text-white/80"
+            }`}
+          >
+            <span className="text-base w-7 text-right shrink-0">
+              {i < 3 ? MEDALS[i] : `${i + 1}.`}
+            </span>
+            <span className="flex-1 text-right px-2 truncate">{entry.name}</span>
+            <span className="font-black text-white shrink-0">🥒 {entry.score}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
