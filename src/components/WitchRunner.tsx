@@ -688,9 +688,6 @@ export default function WitchRunner() {
 
               {gameoverPhase === "done" && (
                 <>
-                  {leaderboard.length > 0 && (
-                    <WitchLeaderboard entries={leaderboard} highlightId={newEntryId} />
-                  )}
                   <motion.button
                     whileTap={{ scale: 0.9 }}
                     onClick={startGame}
@@ -698,6 +695,9 @@ export default function WitchRunner() {
                   >
                     שׁוּב פַּעַם! 🧙‍♀️
                   </motion.button>
+                  {leaderboard.length > 0 && (
+                    <WitchLeaderboard entries={leaderboard} highlightId={newEntryId} />
+                  )}
                 </>
               )}
             </motion.div>
