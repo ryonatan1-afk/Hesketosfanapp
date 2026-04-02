@@ -271,7 +271,7 @@ function drawParsley(ctx: CanvasRenderingContext2D, x: number) {
 
 // ─── Drawing: zucchini collectible ────────────────────────────────────────────
 // Floats in the air — witch must jump to collect it.
-const ZUCCHINI_Y = GROUND_Y - 80; // center Y; witch needs to jump to reach this
+const ZUCCHINI_Y = GROUND_Y - 120; // center Y; witch needs to jump to reach this
 
 function drawZucchini(ctx: CanvasRenderingContext2D, x: number, frame: number) {
   const floatY = ZUCCHINI_Y + Math.sin(frame * 0.07) * 5; // gentle bob
