@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Heebo } from "next/font/google";
+import { Heebo, Rubik, Rubik_Bubbles } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
@@ -8,6 +8,20 @@ const heebo = Heebo({
   variable: "--font-heebo",
   subsets: ["hebrew", "latin"],
   weight: ["400", "700", "900"],
+});
+
+const rubik = Rubik({
+  variable: "--font-rubik",
+  subsets: ["hebrew", "latin"],
+  weight: ["400", "700", "900"],
+  display: "swap",
+});
+
+const rubikBubbles = Rubik_Bubbles({
+  variable: "--font-rubik-bubbles",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
 });
 
 const BASE_URL = "https://hesketosfanapp.vercel.app";
@@ -51,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl" className={`${heebo.variable} h-full`}>
+    <html lang="he" dir="rtl" className={`${heebo.variable} ${rubik.variable} ${rubikBubbles.variable} h-full`}>
       <head>
         <meta name="theme-color" content="#68B8ED" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
