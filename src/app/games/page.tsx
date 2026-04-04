@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 const games = [
   { emoji: "🎮", label: "חַזְרוּ אַחֲרַי!", description: "מִשְׂחַק זִכָּרוֹן — חִזְרוּ עַל הַסֵּדֶר!", href: "/games/simon",        gradient: "linear-gradient(135deg,#ff6b6b,#e84393)" },
   { emoji: "🧙‍♀️", label: "הַמְּכַשֵּׁפָה הַרָּצָה", description: "אֱסֹף קִישׁוּאִים — הִמָּנַע מִפֶּטְרוֹזִילְיוֹן!", href: "/games/witch-runner", gradient: "linear-gradient(135deg,#a78bfa,#ec4899)" },
+  { emoji: "🧠", label: "זִכָּרוֹן",             description: "מִצְאוּ זוּגוֹת — 3 רָמוֹת קֹשִׁי!",              href: "/games/memory",      gradient: "linear-gradient(135deg,#34d399,#059669)" },
 ];
 
 export default function GamesPage() {
