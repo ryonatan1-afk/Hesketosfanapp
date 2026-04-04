@@ -46,8 +46,30 @@ export default function HomePage() {
     return () => window.removeEventListener(COINS_EVENT, onCoins);
   }, []);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "הסכתוס — אתר המעריצים",
+    url: "https://hesketosfanapp.vercel.app",
+    description: "אתר המעריצים הלא רשמי של הסכתוס — פודקאסט לילדים. חידונים, לוח צלילים, יצירה וגלריה.",
+    inLanguage: "he",
+    audience: {
+      "@type": "Audience",
+      audienceType: "ילדים",
+    },
+    about: {
+      "@type": "PodcastSeries",
+      name: "הסכתוס",
+      inLanguage: "he",
+    },
+  };
+
   return (
     <div className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <InstallBanner />
 
       {/* Twinkling stars */}
