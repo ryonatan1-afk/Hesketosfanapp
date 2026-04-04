@@ -106,7 +106,7 @@ export default function HomePage() {
         <div className={styles.badge}>⭐ אֲתַר הַמַּעֲרִיצִים הַלֹּא רַשְׁמִי</div>
         <span className={styles.mascot}>🎙️</span>
         <h1 className={styles.heroTitle}>
-          <span className={styles.heroTitleGradient}>הֶסְכֵּתוֹס</span>
+          <span className={styles.heroTitleGradient}>הסכתוס</span>
         </h1>
         <p className={styles.heroSub}>בּוֹאוּ נִרְאֶה מַה עָשִׂינוּ יַחַד!</p>
         {coins > 0 && (
