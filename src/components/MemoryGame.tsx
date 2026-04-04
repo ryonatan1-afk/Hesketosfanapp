@@ -136,6 +136,8 @@ export default function MemoryGame() {
       });
       setSubmitted(true);
       trackEvent("memory_score_submitted", { difficulty, score });
+      await fetchScores();
+      setTab("leaderboard");
     } finally {
       setSubmitting(false);
     }
@@ -260,7 +262,12 @@ export default function MemoryGame() {
                   </button>
                 </div>
               ) : (
-                <p className="text-green-600 font-black text-lg">✓ הַנִּיקּוּד נִשְׁמַר!</p>
+                <button
+                  onClick={() => { fetchScores(); setTab("leaderboard"); }}
+                  className="bg-[#1a1a2e] text-white rounded-xl py-3 text-lg font-black w-full"
+                >
+                  🏆 צְפֵה בְּטוֹפ 10
+                </button>
               )}
 
               <button
