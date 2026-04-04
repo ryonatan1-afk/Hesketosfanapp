@@ -31,7 +31,7 @@ export default function TopNav() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -56, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 28 }}
-          className="fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-4 bg-white/10 backdrop-blur-md"
+          className="fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-4 bg-[#fef6e4]/80 backdrop-blur-md border-b border-[#1a1a2e]/5"
         >
           {/* Back — right side in RTL */}
           <button
@@ -44,14 +44,14 @@ export default function TopNav() {
               }
             }}
             aria-label="חֲזוֹר"
-            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-black/20 text-white backdrop-blur-sm"
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[#1a1a2e]/8 text-[#1a1a2e]"
           >
             <ChevronRight size={24} strokeWidth={2.5} />
           </button>
 
           {/* Coin balance — center */}
           {coins > 0 && (
-            <span className="px-3 py-1 rounded-2xl bg-black/20 text-white text-sm font-bold backdrop-blur-sm">
+            <span className="px-3 py-1 rounded-2xl bg-[#1a1a2e]/8 text-[#1a1a2e] text-sm font-bold">
               🪙 {coins}
             </span>
           )}
@@ -61,7 +61,7 @@ export default function TopNav() {
             href="/"
             onClick={() => trackEvent("home_button_clicked", { from_page: pathname })}
             aria-label="עַמּוּד בַּיִת"
-            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-black/20 text-white backdrop-blur-sm"
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[#1a1a2e]/8 text-[#1a1a2e]"
           >
             <Home size={20} strokeWidth={2.5} />
           </Link>

@@ -111,9 +111,8 @@ export default function QuizPlayer() {
   // Episode selector screen
   if (!quiz) {
     return (
-      <div className="min-h-screen bg-blue flex flex-col p-6 pb-24 relative overflow-hidden">
-        <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
-        <h1 className="text-white text-4xl font-black text-center mb-8 mt-4 drop-shadow">
+      <div className="min-h-screen bg-[#fef6e4] flex flex-col p-6 pb-24 relative overflow-hidden">
+        <h1 className="text-[#1a1a2e] text-4xl font-black text-center mb-8 mt-4">
           בְּחַר פֶּרֶק
         </h1>
         <div className="flex flex-col gap-4">
@@ -144,7 +143,7 @@ export default function QuizPlayer() {
             );
           })}
         </div>
-        <p className="text-white/60 text-sm font-normal text-center mt-6">
+        <p className="text-gray-400 text-sm font-normal text-center mt-6">
           עוֹד פְּרָקִים בַּדֶּרֶךְ ✨
         </p>
       </div>
@@ -211,8 +210,7 @@ export default function QuizPlayer() {
 
   if (finished) {
     return (
-      <div className="min-h-screen bg-yellow flex flex-col items-center justify-center gap-6 p-6 text-center relative overflow-hidden">
-        <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
+      <div className="min-h-screen bg-[#fef6e4] flex flex-col items-center justify-center gap-6 p-6 text-center relative overflow-hidden">
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -220,10 +218,10 @@ export default function QuizPlayer() {
           className="flex flex-col items-center gap-5"
         >
           <span className="text-8xl">⭐</span>
-          <h1 className="text-white text-6xl font-black leading-tight drop-shadow">
+          <h1 className="text-[#1a1a2e] text-6xl font-black leading-tight">
             כָּל הַכָּבוֹד!
           </h1>
-          <p className="text-white text-2xl font-bold">
+          <p className="text-[#1a1a2e] text-2xl font-bold">
             עָנִיתָ נָכוֹן עַל {score} מִתּוֹךְ {total} שְׁאֵלוֹת
           </p>
           <motion.div
@@ -232,25 +230,26 @@ export default function QuizPlayer() {
             transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.2 }}
             className="flex flex-col items-center gap-1"
           >
-            <p className="text-white text-3xl font-black">
+            <p className="text-[#1a1a2e] text-3xl font-black">
               🪙 +{coinsEarned} מַטְבְּעוֹת!
             </p>
             {isPerfect && (
-              <p className="text-white/80 text-lg font-bold">בּוֹנוּס שְׁלֵמוּת! +3 ✨</p>
+              <p className="text-gray-500 text-lg font-bold">בּוֹנוּס שְׁלֵמוּת! +3 ✨</p>
             )}
           </motion.div>
           <div className="flex gap-4 flex-wrap justify-center">
             <motion.button
               whileTap={{ scale: 0.92 }}
               onClick={handleRestart}
-              className="mt-4 bg-white text-yellow text-2xl font-bold px-10 py-5 rounded-3xl shadow-lg"
+              className="mt-4 text-white text-2xl font-bold px-10 py-5 rounded-3xl shadow-lg"
+              style={{ background: "linear-gradient(135deg,#f59e0b,#f97316)" }}
             >
               שַׂחֲקוּ שׁוּב
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.92 }}
               onClick={handleBack}
-              className="mt-4 bg-ink text-white text-2xl font-bold px-10 py-5 rounded-3xl shadow-lg"
+              className="mt-4 bg-[#1a1a2e] text-white text-2xl font-bold px-10 py-5 rounded-3xl shadow-lg"
             >
               פְּרָקִים
             </motion.button>
@@ -261,13 +260,12 @@ export default function QuizPlayer() {
   }
 
   return (
-    <div className="min-h-screen bg-yellow flex flex-col p-6 pb-8 relative overflow-hidden">
-      <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
-
+    <div className="min-h-screen bg-[#fef6e4] flex flex-col p-6 pb-8 relative overflow-hidden">
       {/* Progress bar */}
-      <div className="w-full h-3 bg-white/30 rounded-full mb-6 overflow-hidden">
+      <div className="w-full h-3 bg-[#1a1a2e]/10 rounded-full mb-6 overflow-hidden">
         <motion.div
-          className="h-full bg-white rounded-full"
+          className="h-full rounded-full"
+          style={{ background: "linear-gradient(90deg,#ff6b6b,#f9c74f)" }}
           animate={{ width: `${((currentIndex + 1) / total) * 100}%` }}
           transition={{ duration: 0.4 }}
         />
@@ -277,12 +275,12 @@ export default function QuizPlayer() {
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={handleBack}
-          className="text-white/80 text-sm font-normal"
+          className="text-gray-500 text-sm font-normal"
         >
           ← פְּרָקִים
         </button>
-        <span className="text-white/80 text-sm font-normal">{quiz.episodeLabel}</span>
-        <span className="text-white/80 text-sm font-normal">
+        <span className="text-gray-500 text-sm font-normal">{quiz.episodeLabel}</span>
+        <span className="text-gray-500 text-sm font-normal">
           {currentIndex + 1} / {total}
         </span>
       </div>
@@ -297,7 +295,7 @@ export default function QuizPlayer() {
           transition={{ duration: 0.25 }}
           className="flex flex-col flex-1 gap-5"
         >
-          <h2 className="text-white text-3xl font-black leading-snug text-center mb-2">
+          <h2 className="text-[#1a1a2e] text-3xl font-black leading-snug text-center mb-2">
             {question.question}
           </h2>
 
@@ -311,7 +309,7 @@ export default function QuizPlayer() {
                   animate={{ y: -48, opacity: 0, scale: 1.3 }}
                   exit={{}}
                   transition={{ duration: 0.7 }}
-                  className="absolute inset-x-0 text-center text-white text-2xl font-black pointer-events-none"
+                  className="absolute inset-x-0 text-center text-[#1a1a2e] text-2xl font-black pointer-events-none"
                 >
                   +1 🪙
                 </motion.p>

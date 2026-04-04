@@ -68,8 +68,7 @@ export default function SoundboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-lavender flex flex-col relative overflow-hidden">
-      <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
+    <div className="min-h-screen bg-[#fef6e4] flex flex-col relative overflow-hidden">
 
       {/* Emoji overlay */}
       <AnimatePresence>
@@ -127,9 +126,9 @@ export default function SoundboardPage() {
 
       {/* Header */}
       <div className="flex flex-col items-center pt-8 pb-2 px-6 text-center">
-        <h1 className="text-white text-5xl font-black leading-tight mt-1">לוּחַ צְלִילִים</h1>
+        <h1 className="text-[#1a1a2e] text-5xl font-black leading-tight mt-1">לוּחַ צְלִילִים</h1>
         {isQuietTime && (
-          <p className="text-white/70 text-base font-bold mt-2">🌙 ששש...לילה — הַצְּלִילִים נְעוּלִים</p>
+          <p className="text-gray-500 text-base font-bold mt-2">🌙 ששש...לילה — הַצְּלִילִים נְעוּלִים</p>
         )}
       </div>
 

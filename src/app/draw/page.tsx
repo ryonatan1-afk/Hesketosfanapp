@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function DrawPage() {
   return (
-    <div className="bg-lavender min-h-screen">
+    <div className="bg-[#fef6e4] min-h-screen">
       <DrawingCanvas />
     </div>
   );

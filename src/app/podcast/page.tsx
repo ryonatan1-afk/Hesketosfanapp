@@ -13,9 +13,7 @@ const SPOTIFY_URL = "https://open.spotify.com/show/51J3gxBQL2Vdj1hbYX2MfZ";
 
 export default function PodcastPage() {
   return (
-    <div className="min-h-screen bg-blue relative pb-24 flex flex-col items-center justify-center gap-8 px-6">
-      <div className="absolute bottom-0 inset-x-0 h-3 bg-coral rounded-t-full" />
-
+    <div className="min-h-screen bg-[#fef6e4] relative pb-24 flex flex-col items-center justify-center gap-8 px-6">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={ARTWORK}
@@ -26,8 +24,8 @@ export default function PodcastPage() {
       />
 
       <div className="text-center">
-        <h1 className="text-4xl font-black text-white mb-2">הַסְכָּתוֹס</h1>
-        <p className="text-white/80 text-lg font-medium">פּוֹדְקַאסְט לְיַלְדִים</p>
+        <h1 className="text-4xl font-black text-[#1a1a2e] mb-2">הַסְכָּתוֹס</h1>
+        <p className="text-gray-500 text-lg font-medium">פּוֹדְקַאסְט לְיַלְדִים</p>
       </div>
 
       <a

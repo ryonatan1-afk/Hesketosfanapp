@@ -21,19 +21,23 @@ const CARDS = [
   { emoji: "👑", label: "מֶלֶךְ הַטְּרִיוִויָה", href: "/trivia",     cls: styles.card6, wiggleDelay: "2s",   cardDelay: "1.05s", isNew: true },
 ];
 
-// Stars generated once on the client — random positions/timing
-const STARS = Array.from({ length: 40 }, (_, i) => ({
-  id: i,
-  left: Math.random() * 100,
-  top:  Math.random() * 100,
-  size: 4 + Math.random() * 6,
-  dur:  2 + Math.random() * 3,
-  delay: Math.random() * 4,
-}));
+type Star = { id: number; left: number; top: number; size: number; dur: number; delay: number };
 
 export default function HomePage() {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [coins, setCoins] = useState(0);
+  const [stars, setStars] = useState<Star[]>([]);
+
+  useEffect(() => {
+    setStars(Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      left:  Math.random() * 100,
+      top:   Math.random() * 100,
+      size:  4 + Math.random() * 6,
+      dur:   2 + Math.random() * 3,
+      delay: Math.random() * 4,
+    })));
+  }, []);
 
   useEffect(() => {
     setCoins(getCoins());
@@ -48,7 +52,7 @@ export default function HomePage() {
 
       {/* Twinkling stars */}
       <div className={styles.stars}>
-        {STARS.map((s) => (
+        {stars.map((s) => (
           <div
             key={s.id}
             style={{
