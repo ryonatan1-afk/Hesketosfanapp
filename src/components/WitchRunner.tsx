@@ -707,7 +707,7 @@ export default function WitchRunner() {
 
       {/* Leaderboard below canvas when idle/playing */}
       {uiPhase !== "dead" && leaderboard.length > 0 && (
-        <div className="w-full max-w-[400px]">
+        <div className="w-full max-w-[400px] bg-black/70 rounded-3xl px-4 py-3">
           <WitchLeaderboard entries={leaderboard} highlightId={null} />
         </div>
       )}
