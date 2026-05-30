@@ -126,7 +126,6 @@ export default function HomePage() {
             className={`${styles.card} ${card.cls}`}
             style={{ "--card-delay": card.cardDelay } as React.CSSProperties}
           >
-            {card.isNew  && <div className={styles.newDot}  />}
             {card.isLive && <div className={styles.liveDot} />}
             <span
               className={styles.cardIcon}
