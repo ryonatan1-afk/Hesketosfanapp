@@ -3,11 +3,10 @@
 import Image from "next/image";
 import { useRef, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, BellOff, Share2, Play, Pause, Mic, Heart, Square, RotateCcw } from "lucide-react";
+import { Bell, BellOff, Share2, Play, Pause, Mic, Square, RotateCcw } from "lucide-react";
 import confetti from "canvas-confetti";
 import { trackEvent } from "@/lib/analytics";
 import { jokes } from "@/data/baktus-jokes";
-import { fanPicks } from "@/data/baktus-fan-picks";
 import { useAudioPlayer } from "./useAudioPlayer";
 import { useRecorder } from "./useRecorder";
 
@@ -45,11 +44,6 @@ const SEED_WALL: WallEmoji[] = [
   { emoji: "🔥", x: 93, y: 52, size: 16, ts: 13 },
 ];
 
-const merch = [
-  { name: "חוּלְצַת בַּקְטוּס", emoji: "👕", price: "₪999",     status: "normal"  },
-  { name: "בּוֹשֶׂם עָדָה",       emoji: "🧴", price: "אָזַל!",    status: "soldout" },
-  { name: "כּוֹבַע אַנְטֶנּוֹת",  emoji: "🎩", price: "בְּקָרוֹב", status: "coming"  },
-];
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -79,6 +73,10 @@ export default function BaktusPage() {
   const [previewProgress,      setPreviewProgress]      = useState(0);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
+  interface FanRecording { id: string; name: string; audio_url: string | null; created_at: string; }
+  const [fanRecordings,        setFanRecordings]        = useState<FanRecording[]>([]);
+  const [fanRecordingsLoading, setFanRecordingsLoading] = useState(true);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem("baktus_emoji_wall");
@@ -95,6 +93,14 @@ export default function BaktusPage() {
     } catch {
       setWallEmojis(SEED_WALL);
     }
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/baktus/recordings")
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setFanRecordings(data); })
+      .catch(() => {})
+      .finally(() => setFanRecordingsLoading(false));
   }, []);
 
   // Preview audio: wire up when a recording finishes
@@ -233,7 +239,7 @@ export default function BaktusPage() {
       playAllIdxRef.current++;
       const joke = jokes[idx];
       trackEvent("baktus_joke_play", { joke_id: joke.id, source: "play_all" });
-      player.play(joke.id, joke.audioUrl, playNext);
+      player.play(String(joke.id), joke.audioUrl, playNext);
     };
     playNext();
   }
@@ -383,12 +389,12 @@ export default function BaktusPage() {
             <button
               onClick={() => {
                 trackEvent("baktus_joke_play", { joke_id: newest.id, joke_number: newest.number });
-                player.play(newest.id, newest.audioUrl);
+                player.play(String(newest.id), newest.audioUrl);
               }}
-              aria-label={player.playingId === newest.id ? "הַשְׁהֵה" : `נַגֵּן בְּדִיחָה: ${newest.title}`}
+              aria-label={player.playingId === String(newest.id) ? "הַשְׁהֵה" : `נַגֵּן בְּדִיחָה: ${newest.title}`}
               className="w-14 h-14 bg-[#1a1a2e] rounded-full flex items-center justify-center flex-shrink-0 active:scale-95 transition-transform"
             >
-              {player.playingId === newest.id
+              {player.playingId === String(newest.id)
                 ? <Pause size={22} fill="white" className="text-white" />
                 : <Play  size={22} fill="white" className="text-white translate-x-0.5" />}
             </button>
@@ -403,7 +409,7 @@ export default function BaktusPage() {
             {newest.views} צְפִיּוֹת · {newest.likes} לַיְק · {newest.comments} תְּגוּבוֹת
           </p>
           {/* Progress bar */}
-          {player.playingId === newest.id && (
+          {player.playingId === String(newest.id) && (
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-200">
               <div
                 className="h-full bg-amber-500 transition-[width] duration-200"
@@ -416,13 +422,13 @@ export default function BaktusPage() {
         {/* Older jokes */}
         <div className="divide-y divide-gray-100">
           {olderJokes.map((j) => {
-            const isActive = player.playingId === j.id;
+            const isActive = player.playingId === String(j.id);
             return (
               <div key={j.id} className={`flex items-center gap-3 py-3 transition-colors ${isActive ? "bg-blue-50 -mx-5 px-5 rounded-xl" : ""}`}>
                 <button
                   onClick={() => {
                     trackEvent("baktus_joke_play", { joke_id: j.id, joke_number: j.number });
-                    player.play(j.id, j.audioUrl);
+                    player.play(String(j.id), j.audioUrl);
                   }}
                   aria-label={isActive ? "הַשְׁהֵה" : `נַגֵּן בְּדִיחָה: ${j.title}`}
                   className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 active:scale-95 transition-all ${isActive ? "bg-[#68B8ED]" : "bg-gray-100 hover:bg-gray-200"}`}
@@ -711,44 +717,61 @@ export default function BaktusPage() {
         </div>
       </section>
 
-      {/* ── 4. Baktus Picks ────────────────────────────────────────────────── */}
+      {/* ── 4. Fan Recordings ──────────────────────────────────────────────── */}
       <section className="bg-white mx-4 mt-4 rounded-3xl p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="font-black text-lg text-[#1a1a2e]">הַמַּעֲרִיצִים שֶׁבַּקְטוּס בָּחַר</h2>
-          <span className="text-xs text-gray-500 flex-shrink-0 mr-2">
-            3 מִתּוֹךְ 847 הֶקְלָטוֹת
-          </span>
-        </div>
-        <p className="text-sm text-gray-500 mb-4">הַזּוֹכִים הַשָּׁבוּעַ 🏆</p>
+        <h2 className="font-black text-lg text-[#1a1a2e]">מַה שֶּׁשָּׁלְחוּ לִי 📬</h2>
+        <p className="text-sm text-gray-500 mt-1 mb-4">הֶקְלָטוֹת מֵהַמַּעֲרִיצִים שֶׁשָּׁמַעְתִּי</p>
 
-        <div className="flex flex-col gap-3">
-          {fanPicks.map((pick) => (
-            <div key={pick.id} className="flex items-center gap-3 bg-gray-50 rounded-2xl p-3">
-              {pick.rank === 1 && (
-                <span className="text-xl flex-shrink-0" aria-label="מָקוֹם רִאשׁוֹן">🏆</span>
-              )}
-              <button
-                onClick={() => trackEvent("baktus_fan_pick_play", { pick_id: pick.id })}
-                aria-label={`נַגֵּן הֶקְלָטָה: ${pick.title}`}
-                className="w-10 h-10 bg-[#1a1a2e] rounded-full flex items-center justify-center flex-shrink-0 hover:bg-gray-800 active:scale-95 transition-all"
-              >
-                <Play size={13} fill="white" className="text-white translate-x-0.5" />
-              </button>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm text-[#1a1a2e]">
-                  {pick.name}, {pick.age}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {pick.title} · {pick.duration}
-                </p>
+        {fanRecordingsLoading ? (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-2xl p-3 animate-pulse">
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-gray-200 rounded-full w-1/2" />
+                </div>
               </div>
-              <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
-                <Heart size={12} fill="#f87171" className="text-red-400" />
-                {pick.hearts}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : fanRecordings.length === 0 ? (
+          <div className="text-center py-6">
+            <p className="text-3xl mb-2">🎙️</p>
+            <p className="text-sm text-gray-500">עֲדַיִן אֵין הֶקְלָטוֹת. שִׁלְחוּ לִי מַשֶּׁהוּ!</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {fanRecordings.map((rec) => {
+              const isActive = player.playingId === rec.id;
+              return (
+                <div key={rec.id} className={`flex items-center gap-3 rounded-2xl p-3 transition-colors ${isActive ? "bg-blue-50" : "bg-gray-50"}`}>
+                  <button
+                    onClick={() => {
+                      if (rec.audio_url) {
+                        trackEvent("baktus_fan_recording_play", { id: rec.id });
+                        player.play(rec.id, rec.audio_url);
+                      }
+                    }}
+                    disabled={!rec.audio_url}
+                    aria-label={isActive ? "הַשְׁהֵה" : `נַגֵּן הֶקְלָטָה שֶׁל ${rec.name}`}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 active:scale-95 transition-all disabled:opacity-40 ${isActive ? "bg-[#68B8ED]" : "bg-[#1a1a2e] hover:bg-gray-800"}`}
+                  >
+                    {isActive
+                      ? <Pause size={13} fill="white" className="text-white" />
+                      : <Play  size={13} fill="white" className="text-white translate-x-0.5" />}
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-[#1a1a2e] truncate">{rec.name}</p>
+                    {isActive && (
+                      <div className="w-full h-1 bg-blue-200 rounded-full mt-1.5 overflow-hidden" dir="ltr">
+                        <div className="h-full bg-[#68B8ED] transition-[width] duration-200" style={{ width: `${player.progress * 100}%` }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* ── 5. Emoji Wall ──────────────────────────────────────────────────── */}
@@ -823,38 +846,7 @@ export default function BaktusPage() {
         </div>
       </section>
 
-      {/* ── 6. Merch Shop ──────────────────────────────────────────────────── */}
-      <section className="bg-white mx-4 mt-4 rounded-3xl p-5 shadow-sm">
-        <h2 className="font-black text-lg text-[#1a1a2e]">הַסְּחוֹרָה שֶׁלִּי 🛍️</h2>
-        <p className="text-xs text-gray-500 mt-1 mb-4">
-          בְּקָרוֹב מְאוֹד (אוּלַי. תִּשְׁאֲלוּ אֶת אַבָּא שֶׁלִּי)
-        </p>
-
-        <div className="grid grid-cols-3 gap-3">
-          {merch.map((item) => (
-            <div
-              key={item.name}
-              className={`rounded-2xl p-3 text-center flex flex-col items-center gap-2 ${
-                item.status === "soldout" ? "opacity-60 bg-gray-50" : "bg-amber-50"
-              }`}
-            >
-              <span className="text-3xl" aria-hidden="true">{item.emoji}</span>
-              <p className="text-xs font-bold text-[#1a1a2e] leading-tight">{item.name}</p>
-              <p
-                className={`text-sm font-black ${
-                  item.status === "soldout" ? "text-red-500" :
-                  item.status === "coming"  ? "text-gray-500" :
-                  "text-[#1a1a2e]"
-                }`}
-              >
-                {item.price}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 7. Footer ──────────────────────────────────────────────────────── */}
+      {/* ── 6. Footer ──────────────────────────────────────────────────────── */}
       <footer className="mx-4 mt-6 mb-2 text-center">
         <p className="text-[11px] text-gray-500 leading-relaxed">
           כָּל הַזְּכֻיּוֹת שְׁמוּרוֹת לִי, בַּקְטוּס, וְלִי בִּלְבַד<br />

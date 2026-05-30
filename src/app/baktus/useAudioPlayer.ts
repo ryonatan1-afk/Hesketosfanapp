@@ -1,14 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 
 export interface AudioPlayerState {
-  playingId: number | null;
+  playingId: string | null;
   progress: number; // 0–1
   elapsed: number;  // seconds
   duration: number; // seconds
 }
 
 export interface AudioPlayer extends AudioPlayerState {
-  play: (id: number, url: string, onEnd?: () => void) => void;
+  play: (id: string, url: string, onEnd?: () => void) => void;
   stop: () => void;
 }
 
@@ -16,7 +16,7 @@ export function useAudioPlayer(): AudioPlayer {
   const audioRef         = useRef<HTMLAudioElement | null>(null);
   const onEndRef         = useRef<(() => void) | undefined>(undefined);
 
-  const [playingId, setPlayingId] = useState<number | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
   const [progress,  setProgress]  = useState(0);
   const [elapsed,   setElapsed]   = useState(0);
   const [duration,  setDuration]  = useState(0);
@@ -36,7 +36,7 @@ export function useAudioPlayer(): AudioPlayer {
     setDuration(0);
   }, []);
 
-  const play = useCallback((id: number, url: string, onEnd?: () => void) => {
+  const play = useCallback((id: string, url: string, onEnd?: () => void) => {
     // Toggle: tapping the active track pauses it
     if (audioRef.current && playingId === id) {
       stop();
