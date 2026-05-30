@@ -21,12 +21,6 @@ interface WallEmoji {
 
 // ── Static page data ──────────────────────────────────────────────────────────
 
-const highlights = [
-  { emoji: "💕", label: "עָדָה",          ring: "ring-pink-400",   bg: "bg-pink-50"   },
-  { emoji: "🍞", label: "אוֹכֶל",         ring: "ring-amber-400",  bg: "bg-amber-50"  },
-  { emoji: "🎙️", label: "פּוֹדְקַאסְט",   ring: "ring-blue-300",   bg: "bg-blue-50"   },
-  { emoji: "😴", label: "חַיֵּי לַיְלָה",  ring: "ring-purple-300", bg: "bg-purple-50" },
-];
 
 const SEED_WALL: WallEmoji[] = [
   { emoji: "❤️", x: 8,  y: 15, size: 22, ts: 1 },
@@ -344,23 +338,6 @@ export default function BaktusPage() {
           </AnimatePresence>
         </div>
 
-        {/* Story highlights */}
-        <div className="flex gap-5 mt-5 overflow-x-auto pb-1 justify-center px-2">
-          {highlights.map((h) => (
-            <button
-              key={h.label}
-              onClick={() => trackEvent("baktus_highlight_click", { highlight: h.label })}
-              className="flex flex-col items-center gap-1.5 flex-shrink-0"
-            >
-              <div className={`w-14 h-14 rounded-full ring-2 ring-offset-2 ${h.ring} ${h.bg} flex items-center justify-center text-2xl`}>
-                {h.emoji}
-              </div>
-              <span className="text-[11px] text-gray-500 text-center leading-tight max-w-[56px]">
-                {h.label}
-              </span>
-            </button>
-          ))}
-        </div>
       </section>
 
       {/* ── 2. Friday Jokes Feed ───────────────────────────────────────────── */}
