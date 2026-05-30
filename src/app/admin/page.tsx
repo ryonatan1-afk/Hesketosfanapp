@@ -56,15 +56,21 @@ export default function AdminPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch("/api/admin/artworks", {
-      headers: { "x-admin-password": password },
-    });
-    if (res.ok) {
-      sessionStorage.setItem("admin_pw", password);
-      setAuthed(true);
-      fetchAll(password);
-    } else {
-      setError("סִיסְמָה שְׁגוּיָה");
+    try {
+      const res = await fetch("/api/admin/artworks", {
+        headers: { "x-admin-password": password },
+      });
+      if (res.ok) {
+        sessionStorage.setItem("admin_pw", password);
+        setAuthed(true);
+        fetchAll(password);
+      } else if (res.status === 401) {
+        setError("סִיסְמָה שְׁגוּיָה");
+      } else {
+        setError(`שְׁגִיאַת שֶׁרֶת (${res.status}) — בִּדְקוּ הַגְדְּרוֹת Vercel`);
+      }
+    } catch {
+      setError("אֵין חִיבּוּר — בִּדְקוּ אִינְטֶרְנֶט");
     }
   }
 
