@@ -18,8 +18,7 @@ const CARDS = [
   { emoji: "🎨", label: "יְצִירָה",              href: "/draw",       cls: styles.card3, wiggleDelay: "0.8s", cardDelay: "0.75s" },
   { emoji: "🎙️", label: "פּוֹדְקַאסְט",          href: "/podcast",    cls: styles.card4, wiggleDelay: "1.2s", cardDelay: "0.85s" },
   { emoji: "🎮", label: "מִשְׂחָקִים",            href: "/games",      cls: styles.card5, wiggleDelay: "1.6s", cardDelay: "0.95s" },
-  { emoji: "👑", label: "מֶלֶךְ הַטְּרִיוִויָה", href: "/trivia",     cls: styles.card6, wiggleDelay: "2s",   cardDelay: "1.05s", isNew: true },
-  { emoji: "🪳", label: "בַּקְטוּס",             href: "/baktus",     cls: styles.card7, wiggleDelay: "2.4s", cardDelay: "1.15s", isLive: true },
+  { emoji: "🪳", label: "בַּקְטוּס",             href: "/baktus",     cls: styles.card6, wiggleDelay: "2s",   cardDelay: "1.05s", isLive: true },
 ];
 
 type Star = { id: number; left: number; top: number; size: number; dur: number; delay: number };

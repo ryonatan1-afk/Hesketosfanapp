@@ -72,6 +72,7 @@ export default function BaktusPage() {
   const [fanRecordingsLoading, setFanRecordingsLoading] = useState(true);
 
   useEffect(() => {
+    trackEvent("baktus_page_view");
     try {
       const stored = localStorage.getItem("baktus_emoji_wall");
       setWallEmojis(stored ? (JSON.parse(stored) as WallEmoji[]) : SEED_WALL);
@@ -117,8 +118,15 @@ export default function BaktusPage() {
   function togglePreview() {
     const audio = previewAudioRef.current;
     if (!audio) return;
-    if (previewPlaying) { audio.pause(); setPreviewPlaying(false); }
-    else { audio.play().catch(() => {}); setPreviewPlaying(true); }
+    if (previewPlaying) {
+      audio.pause();
+      setPreviewPlaying(false);
+      trackEvent("baktus_recording_preview_pause");
+    } else {
+      audio.play().catch(() => {});
+      setPreviewPlaying(true);
+      trackEvent("baktus_recording_preview_play");
+    }
   }
 
   async function handleSubmitRecording() {
@@ -514,6 +522,7 @@ export default function BaktusPage() {
                     type="text"
                     value={recorderName}
                     onChange={(e) => setRecorderName(e.target.value)}
+                    onBlur={(e) => { if (e.target.value.trim()) trackEvent("baktus_name_entered"); }}
                     placeholder="הַשֵּׁם שֶׁלִּי הוּא..."
                     maxLength={40}
                     disabled={recorder.status === "recording"}
@@ -635,7 +644,10 @@ export default function BaktusPage() {
                       <input
                         type="checkbox"
                         checked={consent}
-                        onChange={(e) => setConsent(e.target.checked)}
+                        onChange={(e) => {
+                          setConsent(e.target.checked);
+                          trackEvent(e.target.checked ? "baktus_consent_check" : "baktus_consent_uncheck");
+                        }}
                         className="sr-only"
                       />
                       <div
