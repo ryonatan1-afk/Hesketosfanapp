@@ -19,6 +19,7 @@ const CARDS = [
   { emoji: "🎙️", label: "פּוֹדְקַאסְט",          href: "/podcast",    cls: styles.card4, wiggleDelay: "1.2s", cardDelay: "0.85s" },
   { emoji: "🎮", label: "מִשְׂחָקִים",            href: "/games",      cls: styles.card5, wiggleDelay: "1.6s", cardDelay: "0.95s" },
   { emoji: "👑", label: "מֶלֶךְ הַטְּרִיוִויָה", href: "/trivia",     cls: styles.card6, wiggleDelay: "2s",   cardDelay: "1.05s", isNew: true },
+  { emoji: "🪳", label: "בַּקְטוּס",             href: "/baktus",     cls: styles.card7, wiggleDelay: "2.4s", cardDelay: "1.15s", isLive: true },
 ];
 
 type Star = { id: number; left: number; top: number; size: number; dur: number; delay: number };
@@ -126,7 +127,8 @@ export default function HomePage() {
             className={`${styles.card} ${card.cls}`}
             style={{ "--card-delay": card.cardDelay } as React.CSSProperties}
           >
-            {card.isNew && <div className={styles.newDot} />}
+            {card.isNew  && <div className={styles.newDot}  />}
+            {card.isLive && <div className={styles.liveDot} />}
             <span
               className={styles.cardIcon}
               style={{ "--wiggle-delay": card.wiggleDelay } as React.CSSProperties}

@@ -108,7 +108,7 @@
   z-index: 1;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   gap: clamp(8px, 1.5dvh, 14px);
   padding: 0 16px;
   max-width: 500px;
@@ -121,7 +121,7 @@
 @media (min-width: 420px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
   }
 }
 
@@ -169,6 +169,18 @@
 .card4 { background: linear-gradient(135deg, #f97316, #ef4444); }
 .card5 { background: linear-gradient(135deg, #22c55e, #16a34a); }
 .card6 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+.card7 { background: linear-gradient(135deg, #92400e, #d97706); }
+
+.liveDot {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 10px;
+  height: 10px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
 
 .cardIcon {
   font-size: clamp(26px, 6dvh, 44px);

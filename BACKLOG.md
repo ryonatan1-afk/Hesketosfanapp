@@ -14,6 +14,9 @@ Items are roughly priority-ordered within each section. Move things to **Done** 
 - [ ] Podcast page — embed or stream actual podcast episodes
 
 ## Claude's Ideas
+- [x] Simon Says game (`/games/simon`)
+- [x] Witch Runner endless runner (`/games/witch-runner`)
+- [x] Memory card game with difficulties + leaderboard (`/games/memory`)
 - [x] **PWA / Add to Home Screen** — make the app installable so kids (and parents) can tap it like a native app; critical for repeat engagement on mobile
 - [ ] **Loading & error states for Supabase pages** — gallery and admin currently have no graceful fallback; a slow connection will show a broken experience to kids
 - [ ] **Mute / quiet mode** — soundboard and quiz play audio; a toggle lets the app be used in classrooms, restaurants, or quiet settings without embarrassing parents

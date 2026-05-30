@@ -45,7 +45,12 @@ src/
 │   ├── draw/               ← Canvas drawing tool
 │   ├── gallery/            ← Supabase fan art gallery + upload form
 │   ├── admin/              ← Password-gated artwork approval panel
-│   └── podcast/            ← Placeholder
+│   ├── podcast/            ← Placeholder
+│   └── games/              ← Games hub + sub-routes
+│       ├── page.tsx        ← Games grid/landing
+│       ├── simon/          ← Simon Says sequence memory game
+│       ├── witch-runner/   ← Endless runner (collect cucumbers, avoid parsley)
+│       └── memory/         ← Emoji memory card game (3 difficulties, leaderboard)
 └── components/
     ├── BottomNav.tsx        ← Floating home button (hides on homepage)
     ├── ArtworkUpload.tsx    ← Fan art upload form
@@ -80,7 +85,13 @@ src/
 - Grid shows only approved artworks
 - Upload form with 5MB guard, Hebrew feedback, image preview
 
-### 5. Admin Panel (/admin)
+### 5. משחקים — Games (/games)
+- Hub page with grid of games
+- **Simon Says** (`/games/simon`) — colour sequence memory game
+- **Witch Runner** (`/games/witch-runner`) — endless runner; collect cucumbers, avoid parsley
+- **Memory** (`/games/memory`) — emoji card flip game; 3 difficulties (Easy 4×3, Medium 4×4, Hard 5×4); score = round((pairs × multiplier × 10) / moves); Supabase leaderboard (`memory_scores` table: id, name, score, difficulty, created_at)
+
+### 6. Admin Panel (/admin)
 - Password-gated (env var ADMIN_PASSWORD)
 - Approve/delete pending artwork without going to Supabase dashboard
 - Uses service role key via server-side API route
