@@ -10,7 +10,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("voice_recordings")
-    .select("id, name, audio_url, created_at")
+    .select("id, name, audio_url, created_at, listen_count, like_count")
     .eq("approved", true)
     .order("created_at", { ascending: false })
     .limit(20);
@@ -23,10 +23,12 @@ export async function GET() {
         .from("voice-recordings")
         .createSignedUrl(row.audio_url, 3600); // 1 hour
       return {
-        id:         row.id,
-        name:       row.name,
-        created_at: row.created_at,
-        audio_url:  signed?.signedUrl ?? null,
+        id:           row.id,
+        name:         row.name,
+        created_at:   row.created_at,
+        audio_url:    signed?.signedUrl ?? null,
+        listen_count: row.listen_count ?? 0,
+        like_count:   row.like_count   ?? 0,
       };
     })
   );

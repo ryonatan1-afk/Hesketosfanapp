@@ -67,9 +67,18 @@ export default function BaktusPage() {
   const [previewProgress,      setPreviewProgress]      = useState(0);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  interface FanRecording { id: string; name: string; audio_url: string | null; created_at: string; }
+  interface FanRecording {
+    id: string;
+    name: string;
+    audio_url: string | null;
+    created_at: string;
+    listen_count: number;
+    like_count: number;
+  }
   const [fanRecordings,        setFanRecordings]        = useState<FanRecording[]>([]);
   const [fanRecordingsLoading, setFanRecordingsLoading] = useState(true);
+  const [likedIds,             setLikedIds]             = useState<Set<string>>(new Set());
+  const listenedIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     trackEvent("baktus_page_view");
@@ -84,6 +93,10 @@ export default function BaktusPage() {
       }
       if (localStorage.getItem("baktus_pending_recording")) {
         setHasPendingSubmission(true);
+      }
+      const storedLikes = localStorage.getItem("baktus_liked_recordings");
+      if (storedLikes) {
+        setLikedIds(new Set(JSON.parse(storedLikes) as string[]));
       }
     } catch {
       setWallEmojis(SEED_WALL);
@@ -162,6 +175,44 @@ export default function BaktusPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function handleFanRecordingPlay(rec: FanRecording) {
+    if (!rec.audio_url) return;
+    trackEvent("baktus_fan_recording_play", { id: rec.id });
+    player.play(rec.id, rec.audio_url);
+    if (!listenedIdsRef.current.has(rec.id)) {
+      listenedIdsRef.current.add(rec.id);
+      fetch(`/api/baktus/recordings/${rec.id}/listen`, { method: "POST" }).catch(() => {});
+      setFanRecordings(prev =>
+        prev.map(r => r.id === rec.id ? { ...r, listen_count: r.listen_count + 1 } : r)
+      );
+      trackEvent("baktus_fan_recording_listen", { id: rec.id });
+    }
+  }
+
+  function handleLike(rec: FanRecording) {
+    const isLiked = likedIds.has(rec.id);
+    const newLikedIds = new Set(likedIds);
+    if (isLiked) {
+      newLikedIds.delete(rec.id);
+      fetch(`/api/baktus/recordings/${rec.id}/like`, { method: "DELETE" }).catch(() => {});
+      setFanRecordings(prev =>
+        prev.map(r => r.id === rec.id ? { ...r, like_count: Math.max(0, r.like_count - 1) } : r)
+      );
+      trackEvent("baktus_fan_recording_unlike", { id: rec.id });
+    } else {
+      newLikedIds.add(rec.id);
+      fetch(`/api/baktus/recordings/${rec.id}/like`, { method: "POST" }).catch(() => {});
+      setFanRecordings(prev =>
+        prev.map(r => r.id === rec.id ? { ...r, like_count: r.like_count + 1 } : r)
+      );
+      trackEvent("baktus_fan_recording_like", { id: rec.id });
+    }
+    setLikedIds(newLikedIds);
+    try {
+      localStorage.setItem("baktus_liked_recordings", JSON.stringify([...newLikedIds]));
+    } catch { /* ignore */ }
   }
 
   function addEmoji(emoji: string) {
@@ -731,31 +782,49 @@ export default function BaktusPage() {
           <div className="flex flex-col gap-3">
             {fanRecordings.map((rec) => {
               const isActive = player.playingId === rec.id;
+              const isLiked  = likedIds.has(rec.id);
               return (
-                <div key={rec.id} className={`flex items-center gap-3 rounded-2xl p-3 transition-colors ${isActive ? "bg-blue-50" : "bg-gray-50"}`}>
-                  <button
-                    onClick={() => {
-                      if (rec.audio_url) {
-                        trackEvent("baktus_fan_recording_play", { id: rec.id });
-                        player.play(rec.id, rec.audio_url);
-                      }
-                    }}
-                    disabled={!rec.audio_url}
-                    aria-label={isActive ? "הַשְׁהֵה" : `נַגֵּן הֶקְלָטָה שֶׁל ${rec.name}`}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 active:scale-95 transition-all disabled:opacity-40 ${isActive ? "bg-[#68B8ED]" : "bg-[#1a1a2e] hover:bg-gray-800"}`}
-                  >
-                    {isActive
-                      ? <Pause size={13} fill="white" className="text-white" />
-                      : <Play  size={13} fill="white" className="text-white translate-x-0.5" />}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-sm text-[#1a1a2e] truncate">{rec.name}</p>
-                    {isActive && (
-                      <div className="w-full h-1 bg-blue-200 rounded-full mt-1.5 overflow-hidden" dir="ltr">
-                        <div className="h-full bg-[#68B8ED] transition-[width] duration-200" style={{ width: `${player.progress * 100}%` }} />
-                      </div>
-                    )}
+                <div key={rec.id} className={`rounded-2xl p-3 transition-colors ${isActive ? "bg-blue-50" : "bg-gray-50"}`}>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleFanRecordingPlay(rec)}
+                      disabled={!rec.audio_url}
+                      aria-label={isActive ? "הַשְׁהֵה" : `נַגֵּן הֶקְלָטָה שֶׁל ${rec.name}`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 active:scale-95 transition-all disabled:opacity-40 ${isActive ? "bg-[#68B8ED]" : "bg-[#1a1a2e] hover:bg-gray-800"}`}
+                    >
+                      {isActive
+                        ? <Pause size={13} fill="white" className="text-white" />
+                        : <Play  size={13} fill="white" className="text-white translate-x-0.5" />}
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-[#1a1a2e] truncate">{rec.name}</p>
+                      {isActive && (
+                        <div className="w-full h-1 bg-blue-200 rounded-full mt-1.5 overflow-hidden" dir="ltr">
+                          <div className="h-full bg-[#68B8ED] transition-[width] duration-200" style={{ width: `${player.progress * 100}%` }} />
+                        </div>
+                      )}
+                    </div>
+                    <motion.button
+                      onClick={() => handleLike(rec)}
+                      whileTap={{ scale: 0.8 }}
+                      aria-label={isLiked ? "הָסֵר לַיְק" : "תְּנוּ לַיְק לַהֶקְלָטָה"}
+                      className="flex-shrink-0 flex flex-col items-center gap-0.5 min-w-[36px] active:scale-90 transition-transform"
+                    >
+                      <span className={`text-xl leading-none transition-transform ${isLiked ? "scale-110" : "scale-100"}`}>
+                        {isLiked ? "❤️" : "🤍"}
+                      </span>
+                      {rec.like_count > 0 && (
+                        <span className={`text-[10px] font-bold leading-none ${isLiked ? "text-red-500" : "text-gray-400"}`}>
+                          {rec.like_count}
+                        </span>
+                      )}
+                    </motion.button>
                   </div>
+                  {rec.listen_count > 0 && (
+                    <p className="text-[10px] text-gray-400 mt-1.5 mr-[52px]">
+                      🎧 {rec.listen_count.toLocaleString("he-IL")} הֲאָזָנוֹת
+                    </p>
+                  )}
                 </div>
               );
             })}
